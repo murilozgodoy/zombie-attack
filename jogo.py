@@ -180,10 +180,6 @@ class Zumbies(pygame.sprite.Sprite):
 #     def __init__(self):
 #         self.start = pygame.image.load()
 #     def jogar(self):
-
-class Zombies(pygame.sprite.Sprite):
-    def __init__(self):
-        super().__init__()
         
 class FPS:
     def __init__(self):
