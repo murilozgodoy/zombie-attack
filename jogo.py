@@ -105,6 +105,43 @@ class Animacoes(pygame.sprite.Sprite):
             self.frame_atual = (self.frame_atual + 1) % len(self.frames)
             self.image = self.frames[self.frame_atual]
 
+
+
+class Zumbies(pygame.sprite.Sprite):
+    def __init__(self,image,frames):
+        super().__init__()
+        self.frame_atual = 0
+        self.path = image
+        self.carregar_frames(image,frames)
+        self.tempo_ultimo_update = pygame.time.get_ticks()
+        self.intervalo_animacao = 100  
+        self.rect = [1000, 200]
+
+
+
+    def carregar_frames(self, image, frames):
+        image = pygame.image.load(image).convert_alpha()
+        largura = pygame.Surface.get_width(image) * 5
+        altura = pygame.Surface.get_height(image) * 5
+        self.spritesheet = pygame.transform.scale(image,(largura,altura))
+        self.frames = [self.spritesheet.subsurface((i * altura, 0, altura, altura)) for i in range(frames)]
+        self.image = self.frames[0]
+
+
+
+    def trocar_animacao(self, path, frames):
+        self.carregar_frames(path, frames)
+        self.frame_atual = 0
+
+
+
+    def update(self):
+        agora = pygame.time.get_ticks()
+        if agora - self.tempo_ultimo_update > self.intervalo_animacao:
+            self.tempo_ultimo_update = agora
+            self.frame_atual = (self.frame_atual + 1) % len(self.frames)
+            self.image = self.frames[self.frame_atual]
+            self.rect[0] -= 10
 # class Parado(Animacoes):
 #     def __init__(self):
 #         super().__init__("assets/img/Idle.png", 7)
@@ -225,7 +262,7 @@ class TelaJogo(Tela):
     def __init__(self, jogo):
         self.jogo = jogo
         self.personagem = Animacoes("assets/img/Idle.png", 7)
-        self.zumbies = Animacoes("assets/img/Zombie_1/Walk.png",10)
+        self.zumbies = Zumbies("assets/img/Zombie_1/Walk.png",10)
         image = pygame.image.load("assets/img/fundo.png")
         self.fundo = pygame.transform.scale(image,(1920,1080))
         self.municao = 30
@@ -256,7 +293,7 @@ class TelaJogo(Tela):
         # self.grupo_meteoros.update()
         # self.grupo_tiros.update()
         # self.grupo_explosoes.update()
-        # self.zumbies.update()
+        self.zumbies.update()
         self.personagem.update()
 
         # colisoes = pygame.sprite.groupcollide(self.grupo_nave, self.grupo_meteoros, False, True, pygame.sprite.collide_circle)
@@ -289,7 +326,7 @@ class TelaJogo(Tela):
         # janela.blit(texto_fps, (540, 680))
         # self.grupo_nave.draw(janela)
         janela.blit(self.personagem.image, self.personagem.rect)
-        # janela.blit(self.zumbies.image,(640,500))
+        janela.blit(self.zumbies.image,(self.zumbies.rect[0],self.zumbies.rect[1]))
         # self.grupo_meteoros.draw(janela)
         # self.grupo_tiros.draw(janela)
         # self.grupo_explosoes.draw(janela)
