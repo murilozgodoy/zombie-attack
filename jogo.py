@@ -222,9 +222,12 @@ class Tela:
 class TelaInicial(Tela):
     def __init__(self, jogo):
         self.jogo = jogo
+        info = pygame.display.Info()
+        largura = info.current_w
+        altura = info.current_h
         self.fonte = pygame.font.Font("assets/font/PressStart2P.ttf", 30)
         imagem = pygame.image.load("assets/img/tela_incio.png")
-        self.image = pygame.transform.scale(imagem,(1920,1080))
+        self.image = pygame.transform.scale(imagem,(largura,altura))
 
     def trata_eventos(self, eventos):
         for evento in eventos:
@@ -333,7 +336,10 @@ class TelaJogo(Tela):
 class Jogo:
     def __init__(self):
         pygame.init()
-        self.janela = pygame.display.set_mode((1920, 1080))
+        info = pygame.display.Info()
+        largura = info.current_w
+        altura = info.current_h
+        self.janela = pygame.display.set_mode((largura, altura),pygame.FULLSCREEN)
         pygame.display.set_caption("Zombie Attack")
         self.tela_atual = TelaInicial(self)
 
@@ -347,6 +353,9 @@ class Jogo:
             for evento in eventos:
                 if evento.type == pygame.QUIT:
                     rodando = False
+                elif evento.type == pygame.KEYDOWN:
+                    if evento.key == pygame.K_ESCAPE:
+                        rodando = False
             self.tela_atual.trata_eventos(eventos)
             self.tela_atual.atualiza()
             self.tela_atual.desenha(self.janela)
@@ -355,3 +364,5 @@ class Jogo:
 if __name__ == "__main__":
     jogo = Jogo()
     jogo.roda()
+    
+## Save 8/04
