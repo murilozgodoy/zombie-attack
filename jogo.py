@@ -260,11 +260,13 @@ class TelaGameOver(Tela):
 class TelaJogo(Tela):
     def __init__(self, jogo):
         self.jogo = jogo
+        info = pygame.display.Info()
+        self.largura = info.current_w
+        self.altura = info.current_h
         self.personagem = Animacoes("assets/img/Idle.png", 7)
         self.zumbies = Zumbies("assets/img/Zombie_1/Walk.png",10)
         image = pygame.image.load("assets/img/fundo.png")
-        self.fundo = pygame.transform.scale(image,(1920,1080))
-        self.municao = 30
+        self.fundo = pygame.transform.scale(image,(self.largura,self.altura))
         # self.grupo_tiros = pygame.sprite.Group()
         # self.nave = Nave(self.grupo_tiros)
         # self.grupo_nave = pygame.sprite.GroupSingle(self.nave)
@@ -281,7 +283,7 @@ class TelaJogo(Tela):
     def trata_eventos(self, eventos):
         for evento in eventos:
             if evento.type == pygame.KEYDOWN:
-                if evento.key == pygame.K_DOWN and self.municao > 0:
+                if evento.key == pygame.K_DOWN:
                     self.personagem = Animacoes("assets/img/Shot_1.png", 4)
             elif evento.type == pygame.KEYUP:
                 self.personagem = Animacoes("assets/img/Idle.png", 7)
@@ -319,10 +321,10 @@ class TelaJogo(Tela):
         # pygame.draw.rect(janela,(0,0,0),(0,900,1920,360))
         # pygame.draw.rect(janela,(200,200,200),(0,0,1920,900))
         janela.blit(self.fundo,(0,0))
-        # self.fps_monitor.calcula_fps()
-        # texto_fps = self.fonte.render(f'FPS: {self.fps_monitor.fps:.2f}', True, (255, 255, 255))
-        # texto_fps = pygame.transform.scale(texto_fps, (100, 20))
-        # janela.blit(texto_fps, (540, 680))
+        self.fps_monitor.calcula_fps()
+        texto_fps = self.fonte.render(f'FPS: {self.fps_monitor.fps:.2f}', True, (255, 255, 255))
+        texto_fps = pygame.transform.scale(texto_fps, (150, 30))
+        janela.blit(texto_fps, ((self.largura-150), (self.altura-30)))
         # self.grupo_nave.draw(janela)
         janela.blit(self.personagem.image, self.personagem.rect)
         janela.blit(self.zumbies.image,(self.zumbies.rect[0],self.zumbies.rect[1]))
