@@ -231,46 +231,68 @@ class TelaJogo(Tela):
         self.fonte = pygame.font.Font("assets/font/PressStart2P.ttf", 30)
         self.fps_monitor = FPS()
 
+        self.animacao_tiro = False
+        self.animacao_repetir = False  
+
     def trata_eventos(self, eventos):
         for evento in eventos:
             if evento.type == pygame.KEYDOWN:
                 if evento.key == pygame.K_p:
-                        self.personagem.trocar_animacao("assets/img/Shot_1.png", 4)
+                    if not self.animacao_tiro:  # Inicia a animação apenas se não estiver ativa
+                        self.personagem.trocar_animacao("assets/img/Shot_1.png", 4)  # Animação de tiro
+                        self.animacao_tiro = True  # Marca que a animação está em progresso
+                    self.animacao_repetir = True  # Indica que a tecla está pressionada
                 if evento.key == pygame.K_a:  
                     self.moving_left = True
+                    self.personagem.trocar_animacao("assets/img/Walk.png", 7)
                 if evento.key == pygame.K_d: 
                     self.moving_right = True
+                    self.personagem.trocar_animacao("assets/img/Walk.png", 7)
                 if evento.key == pygame.K_w: 
                     self.moving_up = True
                 if evento.key == pygame.K_s:  
                     self.moving_down = True
+
             if evento.type == pygame.KEYUP:
                 if evento.key == pygame.K_p:
-                    self.personagem.trocar_animacao("assets/img/Idle.png", 7)
+                    self.animacao_repetir = False  # Para de repetir quando a tecla for solta
                 if evento.key == pygame.K_a:
                     self.moving_left = False
+                    self.personagem.trocar_animacao("assets/img/Idle.png", 7)
                 if evento.key == pygame.K_d:
                     self.moving_right = False
+                    self.personagem.trocar_animacao("assets/img/Idle.png", 7)
                 if evento.key == pygame.K_w:
                     self.moving_up = False
                 if evento.key == pygame.K_s:
                     self.moving_down = False
 
     def atualiza(self):
+        # Atualizar as animações do personagem e verificar o término da animação de tiro
+        if self.animacao_tiro:
+            if self.personagem.frame_atual == len(self.personagem.frames) - 1:  # Último quadro
+                if self.animacao_repetir:  # Se a tecla ainda estiver pressionada, reinicia
+                    self.personagem.trocar_animacao("assets/img/Shot_1.png", 4)  # Reinicia animação
+                else:
+                    self.animacao_tiro = False  # Conclui a animação de tiro
+                    self.personagem.trocar_animacao("assets/img/Idle.png", 7)  # Retorna à animação parado
+
         self.personagem.update()
         self.zumbies.update()
 
-        # Verificar limites do movimento no eixo Y
-        if self.moving_up and self.personagem.rect.y > 35:
-            self.personagem.mover(0, -2)
-        if self.moving_down and self.personagem.rect.y + self.personagem.rect.height < self.altura:  # Não ultrapassa o limite inferior da tela
-            self.personagem.mover(0, 2)
+        # Verificar movimento horizontal
+        if self.moving_left or self.moving_right:
+            if self.moving_left:
+                self.personagem.mover(-1, 0)
+            if self.moving_right:
+                self.personagem.mover(1, 0)
 
-        # Movimento no eixo X (sem limites, mas pode ser adicionado se necessário)
-        if self.moving_left:
-            self.personagem.mover(-2, 0)
-        if self.moving_right:
-            self.personagem.mover(2, 0)
+        # Verificar movimento vertical
+        if self.moving_up or self.moving_down:
+            if self.moving_up and self.personagem.rect.y > 35:
+                self.personagem.mover(0, -1)
+            if self.moving_down and self.personagem.rect.y + self.personagem.rect.height < self.altura:
+                self.personagem.mover(0, 1)
 
     def desenha(self, janela):
         janela.fill((0, 0, 0))
