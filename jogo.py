@@ -234,6 +234,8 @@ class TelaJogo(Tela):
     def trata_eventos(self, eventos):
         for evento in eventos:
             if evento.type == pygame.KEYDOWN:
+                if evento.key == pygame.K_p:
+                        self.personagem.trocar_animacao("assets/img/Shot_1.png", 4)
                 if evento.key == pygame.K_a:  
                     self.moving_left = True
                 if evento.key == pygame.K_d: 
@@ -243,6 +245,8 @@ class TelaJogo(Tela):
                 if evento.key == pygame.K_s:  
                     self.moving_down = True
             if evento.type == pygame.KEYUP:
+                if evento.key == pygame.K_p:
+                    self.personagem.trocar_animacao("assets/img/Idle.png", 7)
                 if evento.key == pygame.K_a:
                     self.moving_left = False
                 if evento.key == pygame.K_d:
