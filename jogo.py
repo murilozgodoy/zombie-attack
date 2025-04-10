@@ -78,6 +78,25 @@ def colisao_ponto_retangulo(ponto_x, ponto_y, rect_x, rect_y, rect_w, rect_h):
         return True
     return False
 
+class Tiro(pygame.sprite.Sprite):
+    def __init__(self,x,y):
+        super().__init__()
+        self.imagem_tiro = pygame.image.load("assets/img/laserRed16.png")
+        self.image = pygame.transform.scale(self.imagem_tiro, (40,30))
+        self.rect = self.image.get_rect()
+        self.rect.center = (x, y)
+        self.velocidade_x = 4
+        # self.velocidade_y = algum numero (se quisermos fazer um tiro em diagonal)
+    
+    def update(self):
+        info = pygame.display.Info()
+        largura_tela = info.current_w
+        altura_tela = info.current_h
+        self.rect.x += self.velocidade_x
+        if self.rect.right >= largura_tela:
+            self.kill()
+
+
 class Cronometro:
     def __init__(self, minutos, fonte):
         self.tempo_restante = minutos * 60 * 1000
@@ -253,6 +272,7 @@ class TelaJogo(Tela):
         self.altura = info.current_h
         self.personagem = Personagens("assets/img/Idle.png", 7)
         self.zumbies = pygame.sprite.Group()
+        self.tiros = pygame.sprite.Group()
         image = pygame.image.load("assets/img/fundo.png")
         self.fundo = pygame.transform.scale(image, (self.largura, self.altura))
         self.moving_left = False
@@ -277,6 +297,10 @@ class TelaJogo(Tela):
                     if not self.animacao_tiro:  # Inicia a animação apenas se não estiver ativa
                         self.personagem.trocar_animacao("assets/img/Shot_1.png", 4)  # Animação de tiro
                         self.animacao_tiro = True  # Marca que a animação está em progresso
+                    x = self.personagem.rect.centerx
+                    y = self.personagem.rect.centery
+                    novo_tiro = Tiro(x+20,y+130)
+                    self.tiros.add(novo_tiro)
                     self.animacao_repetir = True  # Indica que a tecla está pressionada
                 if evento.key == pygame.K_a:  
                     self.moving_left = True
@@ -294,6 +318,7 @@ class TelaJogo(Tela):
             if evento.type == pygame.KEYUP:
                 if evento.key == pygame.K_p:
                     self.animacao_repetir = False  # Para de repetir quando a tecla for solta
+
                 if evento.key == pygame.K_a:
                     self.moving_left = False
                     if not self.moving_right:
@@ -323,12 +348,17 @@ class TelaJogo(Tela):
             if self.personagem.frame_atual == len(self.personagem.frames) - 1:  # Último quadro
                 if self.animacao_repetir:  # Se a tecla ainda estiver pressionada, reinicia
                     self.personagem.trocar_animacao("assets/img/Shot_1.png", 4)  # Reinicia animação
+                    x = self.personagem.rect.centerx
+                    y = self.personagem.rect.centery
+                    novo_tiro = Tiro(x+20,y+130)
+                    self.tiros.add(novo_tiro)
                 else:
                     self.animacao_tiro = False  # Conclui a animação de tiro
                     self.personagem.trocar_animacao("assets/img/Idle.png", 7)  # Retorna à animação parado
 
         self.personagem.update()
         self.zumbies.update()
+        self.tiros.update()
 
         # Verificar movimento horizontal
         if self.moving_left or self.moving_right:
@@ -359,6 +389,7 @@ class TelaJogo(Tela):
 
         self.personagem.desenha(janela)
         self.zumbies.draw(janela)
+        self.tiros.draw(janela)
         pygame.display.flip()
 
 
