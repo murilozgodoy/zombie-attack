@@ -142,6 +142,9 @@ class Personagens(pygame.sprite.Sprite):
 class Zumbies(pygame.sprite.Sprite):
     def __init__(self, image, frames):
         super().__init__()
+        info = pygame.display.Info()
+        largura_tela = info.current_w
+        altura_tela = info.current_h
         self.frame_atual = 0
         self.path = image
         self.carregar_frames(image, frames)
@@ -149,7 +152,7 @@ class Zumbies(pygame.sprite.Sprite):
         self.intervalo_animacao = 100
         largura = self.frames[0].get_width()
         altura = self.frames[0].get_height()
-        self.rect = pygame.Rect(1000, 200, largura, altura)
+        self.rect = pygame.Rect(largura_tela, 200, largura, altura)
 
     def carregar_frames(self, image, frames):
         image = pygame.image.load(image).convert_alpha()
@@ -249,7 +252,7 @@ class TelaJogo(Tela):
         self.largura = info.current_w
         self.altura = info.current_h
         self.personagem = Personagens("assets/img/Idle.png", 7)
-        self.zumbies = Zumbies("assets/img/Zombie_1/Walk.png", 10)
+        self.zumbies = pygame.sprite.Group()
         image = pygame.image.load("assets/img/fundo.png")
         self.fundo = pygame.transform.scale(image, (self.largura, self.altura))
         self.moving_left = False
@@ -262,7 +265,10 @@ class TelaJogo(Tela):
         self.animacao_tiro = False
         self.animacao_repetir = False
 
-        self.cronometro = Cronometro(1, self.fonte) 
+        self.cronometro = Cronometro(1, self.fonte)
+
+        self.ultima_geracao = pygame.time.get_ticks()
+        self.intervalo_geracao = 3000 # 3000 porque seriam 3000 milisegundos
 
     def trata_eventos(self, eventos):
         for evento in eventos:
@@ -306,6 +312,11 @@ class TelaJogo(Tela):
         if self.cronometro.tempo_acabou:
             self.jogo.trocar_tela(TelaGameOver(self.jogo))
 
+        agora = pygame.time.get_ticks()
+        if agora - self.ultima_geracao > self.intervalo_geracao:
+            self.ultima_geracao = agora
+            novo_zumbi = Zumbies("assets/img/Zombie_1/Walk.png", 10)
+            self.zumbies.add(novo_zumbi)
         
         # Atualizar as animações do personagem e verificar o término da animação de tiro
         if self.animacao_tiro:
@@ -343,8 +354,11 @@ class TelaJogo(Tela):
         
         self.cronometro.desenha(janela, (self.largura // 2) - 50, 10)  # Desenha o cronômetro no canto superior esquerdo
         
+
+
+
         self.personagem.desenha(janela)
-        self.zumbies.desenha(janela)
+        self.zumbies.draw(janela)
         pygame.display.flip()
 
 
