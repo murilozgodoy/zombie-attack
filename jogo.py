@@ -78,6 +78,28 @@ def colisao_ponto_retangulo(ponto_x, ponto_y, rect_x, rect_y, rect_w, rect_h):
         return True
     return False
 
+class Cronometro:
+    def __init__(self, minutos, fonte):
+        self.tempo_restante = minutos * 60 * 1000
+        self.tempo_de_inicio = pygame.time.get_ticks()
+        self.fonte = fonte
+        self.tempo_acabou = False
+    
+    def atualizar(self):
+        agora = pygame.time.get_ticks()
+        self.tempo_restante -= agora - self.tempo_de_inicio
+        self.tempo_de_inicio = agora
+        if self.tempo_restante <= 0:
+            self.tempo_restante = 0
+            self.tempo_acabou = True
+
+    def desenha(self, janela, x, y):
+        minutos = self.tempo_restante // (60 * 1000)
+        segundos = (self.tempo_restante // 1000) % 60
+        texto = f"{minutos:02}:{segundos:02}"
+        renderizado = self.fonte.render(texto, True, (255, 255, 255))
+        janela.blit(renderizado, (x, y))
+        
 class Personagens(pygame.sprite.Sprite):
     def __init__(self, image, frames):
         super().__init__()
@@ -238,7 +260,9 @@ class TelaJogo(Tela):
         self.fps_monitor = FPS()
 
         self.animacao_tiro = False
-        self.animacao_repetir = False  
+        self.animacao_repetir = False
+
+        self.cronometro = Cronometro(1, self.fonte) 
 
     def trata_eventos(self, eventos):
         for evento in eventos:
@@ -274,6 +298,11 @@ class TelaJogo(Tela):
                     self.moving_down = False
 
     def atualiza(self):
+        self.cronometro.atualizar()
+        if self.cronometro.tempo_acabou:
+            self.jogo.trocar_tela(TelaGameOver(self.jogo))
+
+        
         # Atualizar as animações do personagem e verificar o término da animação de tiro
         if self.animacao_tiro:
             if self.personagem.frame_atual == len(self.personagem.frames) - 1:  # Último quadro
@@ -302,12 +331,14 @@ class TelaJogo(Tela):
 
     def desenha(self, janela):
         janela.fill((0, 0, 0))
-    
         janela.blit(self.fundo, (0, 0))
         self.fps_monitor.calcula_fps()
         texto_fps = self.fonte.render(f'FPS: {self.fps_monitor.fps:.2f}', True, (255, 255, 255))
         texto_fps = pygame.transform.scale(texto_fps, (150, 30))
         janela.blit(texto_fps, ((self.largura - 150), (self.altura - 30)))
+        
+        self.cronometro.desenha(janela, (self.largura // 2) - 50, 10)  # Desenha o cronômetro no canto superior esquerdo
+        
         self.personagem.desenha(janela)
         self.zumbies.desenha(janela)
         pygame.display.flip()
