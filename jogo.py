@@ -274,9 +274,11 @@ class TelaJogo(Tela):
                     self.animacao_repetir = True  # Indica que a tecla está pressionada
                 if evento.key == pygame.K_a:  
                     self.moving_left = True
+                    self.moving_right = False
                     self.personagem.trocar_animacao("assets/img/Walk_inverted.png", 7)
                 if evento.key == pygame.K_d: 
                     self.moving_right = True
+                    self.moving_left = False
                     self.personagem.trocar_animacao("assets/img/Walk.png", 7)
                 if evento.key == pygame.K_w: 
                     self.moving_up = True
@@ -288,10 +290,12 @@ class TelaJogo(Tela):
                     self.animacao_repetir = False  # Para de repetir quando a tecla for solta
                 if evento.key == pygame.K_a:
                     self.moving_left = False
-                    self.personagem.trocar_animacao("assets/img/Idle.png", 7)
+                    if not self.moving_right:
+                        self.personagem.trocar_animacao("assets/img/Idle.png", 7)
                 if evento.key == pygame.K_d:
                     self.moving_right = False
-                    self.personagem.trocar_animacao("assets/img/Idle.png", 7)
+                    if not self.moving_left:
+                        self.personagem.trocar_animacao("assets/img/Idle.png", 7)
                 if evento.key == pygame.K_w:
                     self.moving_up = False
                 if evento.key == pygame.K_s:
