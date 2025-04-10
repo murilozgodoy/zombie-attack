@@ -268,7 +268,7 @@ class TelaJogo(Tela):
         self.cronometro = Cronometro(1, self.fonte)
 
         self.ultima_geracao = pygame.time.get_ticks()
-        self.intervalo_geracao = 3000 # 3000 porque seriam 3000 milisegundos
+        self.intervalo_geracao = 4000 # 3000 porque seriam 3000 milisegundos
 
     def trata_eventos(self, eventos):
         for evento in eventos:
