@@ -73,6 +73,10 @@
 import pygame
 import random
 
+def colisao_ponto_retangulo(ponto_x, ponto_y, rect_x, rect_y, rect_w, rect_h):
+    if rect_x <= ponto_x and ponto_x <= rect_x + rect_w and rect_y <= ponto_y and ponto_y <= rect_y + rect_h:
+        return True
+    return False
 
 class Personagens(pygame.sprite.Sprite):
     def __init__(self, image, frames):
@@ -173,7 +177,6 @@ class Tela:
     def desenha(self, janela):
         pass
 
-
 class TelaInicial(Tela):
     def __init__(self, jogo):
         self.jogo = jogo
@@ -181,13 +184,16 @@ class TelaInicial(Tela):
         largura = info.current_w
         altura = info.current_h
         self.fonte = pygame.font.Font("assets/font/PressStart2P.ttf", 30)
-        imagem = pygame.image.load("assets/img/tela_incio.png")
+        imagem = pygame.image.load("assets/img/Inicial.png")
         self.image = pygame.transform.scale(imagem, (largura, altura))
-
     def trata_eventos(self, eventos):
         for evento in eventos:
-            if evento.type == pygame.KEYDOWN and evento.key == pygame.K_RETURN:
-                self.jogo.trocar_tela(TelaJogo(self.jogo))
+            if colisao_ponto_retangulo(pygame.mouse.get_pos()[0], pygame.mouse.get_pos()[1], 535, 374, 475, 135): # Verifica se o mouse está sobre o botão jogar
+                if evento.type == pygame.MOUSEBUTTONDOWN and evento.button == 1:
+                    self.jogo.trocar_tela(TelaJogo(self.jogo))
+            if colisao_ponto_retangulo(pygame.mouse.get_pos()[0], pygame.mouse.get_pos()[1],535, 550, 475, 135): # Verifica se o mouse está sobre o botão instruções
+                if evento.type == pygame.MOUSEBUTTONDOWN and evento.button == 1:
+                    pass # temos que colocar para ir para a pagina de instruções
 
     def desenha(self, janela):
         janela.fill((0, 0, 0))
@@ -296,6 +302,7 @@ class TelaJogo(Tela):
 
     def desenha(self, janela):
         janela.fill((0, 0, 0))
+    
         janela.blit(self.fundo, (0, 0))
         self.fps_monitor.calcula_fps()
         texto_fps = self.fonte.render(f'FPS: {self.fps_monitor.fps:.2f}', True, (255, 255, 255))
