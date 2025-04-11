@@ -81,11 +81,11 @@ def colisao_ponto_retangulo(ponto_x, ponto_y, rect_x, rect_y, rect_w, rect_h):
 class Tiro(pygame.sprite.Sprite):
     def __init__(self,x,y):
         super().__init__()
-        self.imagem_tiro = pygame.image.load("assets/img/laserRed16.png")
-        self.image = pygame.transform.scale(self.imagem_tiro, (40,30))
+        self.imagem_tiro = pygame.image.load("assets/img/bala.png") # precisa ser self.image toda sprite, não self.imagem ou algo do tipo
+        self.image = pygame.transform.scale(self.imagem_tiro, (65,40))
         self.rect = self.image.get_rect()
         self.rect.center = (x, y)
-        self.velocidade_x = 4
+        self.velocidade_x = 10
         # self.velocidade_y = algum numero (se quisermos fazer um tiro em diagonal)
     
     def update(self):
@@ -95,6 +95,36 @@ class Tiro(pygame.sprite.Sprite):
         self.rect.x += self.velocidade_x
         if self.rect.right >= largura_tela:
             self.kill()
+
+class Impacto(pygame.sprite.Sprite):
+    def __init__(self, center, spritesheet, frames):
+        super().__init__()
+        self.frames = self.carregar_frames(spritesheet, frames)
+        self.frame_atual = 0
+        self.image = self.frames[self.frame_atual]
+        self.rect = self.image.get_rect()
+        self.rect.center = center
+        self.tempo_anterior = pygame.time.get_ticks()
+        self.intervalo = 50 
+
+    def carregar_frames(self, spritesheet, frames):
+        spritesheet = pygame.image.load(spritesheet).convert_alpha()
+        largura = spritesheet.get_width()
+        altura = spritesheet.get_height()
+        largura_quadro = largura // frames
+        frames = [spritesheet.subsurface((i * largura_quadro, 0, largura_quadro, altura)) 
+                  for i in range(frames)]
+        return frames
+    
+    def update(self):
+        agora = pygame.time.get_ticks()
+        if agora - self.tempo_anterior > self.intervalo:
+            self.tempo_anterior = agora
+            self.frame_atual += 1
+            if self.frame_atual < len(self.frames):
+                self.image = self.frames[self.frame_atual]
+            else:
+                self.kill()
 
 
 class Cronometro:
@@ -273,6 +303,7 @@ class TelaJogo(Tela):
         self.personagem = Personagens("assets/img/Idle.png", 7)
         self.zumbies = pygame.sprite.Group()
         self.tiros = pygame.sprite.Group()
+        self.impactos = pygame.sprite.Group() 
         image = pygame.image.load("assets/img/fundo.png")
         self.fundo = pygame.transform.scale(image, (self.largura, self.altura))
         self.moving_left = False
@@ -342,7 +373,13 @@ class TelaJogo(Tela):
             self.ultima_geracao = agora
             novo_zumbi = Zumbies("assets/img/Zombie_1/Walk.png", 10)
             self.zumbies.add(novo_zumbi)
-        
+
+        colisao_tiro_zumbi = pygame.sprite.groupcollide(self.tiros, self.zumbies, True, True)
+        for tiro, zumbis_atingidos in colisao_tiro_zumbi.items():
+            for zumbi in zumbis_atingidos:
+                impacto = Impacto(zumbi.rect.center, "assets/img/Zombie_1/Hurt.png", 4)
+                self.zumbies.add(impacto) 
+
         # Atualizar as animações do personagem e verificar o término da animação de tiro
         if self.animacao_tiro:
             if self.personagem.frame_atual == len(self.personagem.frames) - 1:  # Último quadro
@@ -350,7 +387,7 @@ class TelaJogo(Tela):
                     self.personagem.trocar_animacao("assets/img/Shot_1.png", 4)  # Reinicia animação
                     x = self.personagem.rect.centerx
                     y = self.personagem.rect.centery
-                    novo_tiro = Tiro(x+20,y+130)
+                    novo_tiro = Tiro(x+30,y+140)
                     self.tiros.add(novo_tiro)
                 else:
                     self.animacao_tiro = False  # Conclui a animação de tiro
@@ -390,6 +427,7 @@ class TelaJogo(Tela):
         self.personagem.desenha(janela)
         self.zumbies.draw(janela)
         self.tiros.draw(janela)
+        self.impactos.draw(janela)
         pygame.display.flip()
 
 
