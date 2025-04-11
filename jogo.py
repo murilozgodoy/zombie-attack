@@ -282,6 +282,11 @@ class TelaInicial(Tela):
 class TelaGameOver(Tela):
     def __init__(self, jogo):
         self.jogo = jogo
+        info = pygame.display.Info()
+        largura = info.current_w
+        altura = info.current_h
+        imagem = pygame.image.load("assets/img/gameover.png")
+        self.image = pygame.transform.scale(imagem, (largura, altura))
         self.fonte = pygame.font.Font("assets/font/PressStart2P.ttf", 30)
 
     def trata_eventos(self, eventos):
@@ -291,10 +296,11 @@ class TelaGameOver(Tela):
 
     def desenha(self, janela):
         janela.fill((0, 0, 0))
-        texto = self.fonte.render("GAME OVER", True, (255, 0, 0))
-        texto2 = self.fonte.render("R - Reiniciar", True, (255, 255, 255))
-        janela.blit(texto, (180, 300))
-        janela.blit(texto2, (140, 350))
+        janela.blit(self.image,(0,0))
+        # texto = self.fonte.render("GAME OVER", True, (255, 0, 0))
+        # texto2 = self.fonte.render("R - Reiniciar", True, (255, 255, 255))
+        # janela.blit(texto, (180, 300))
+        # janela.blit(texto2, (140, 350))
         pygame.display.flip()
 
 
