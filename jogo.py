@@ -108,11 +108,14 @@ class Impacto(pygame.sprite.Sprite):
         self.intervalo = 50 
 
     def carregar_frames(self, spritesheet, frames):
-        spritesheet = pygame.image.load(spritesheet).convert_alpha()
-        largura = spritesheet.get_width()
-        altura = spritesheet.get_height()
-        largura_quadro = largura // frames
-        frames = [spritesheet.subsurface((i * largura_quadro, 0, largura_quadro, altura)) 
+        image = pygame.image.load(spritesheet).convert_alpha()
+        largura = pygame.Surface.get_width(image) * 5
+        altura = pygame.Surface.get_height(image) * 5
+        spritesheet = pygame.transform.scale(image, (largura, altura))
+        # largura = spritesheet.get_width()
+        # altura = spritesheet.get_height()
+        # largura_quadro = largura // frames
+        frames = [spritesheet.subsurface((i * altura, 0, altura, altura)) 
                   for i in range(frames)]
         return frames
     
@@ -377,7 +380,7 @@ class TelaJogo(Tela):
         colisao_tiro_zumbi = pygame.sprite.groupcollide(self.tiros, self.zumbies, True, True)
         for tiro, zumbis_atingidos in colisao_tiro_zumbi.items():
             for zumbi in zumbis_atingidos:
-                impacto = Impacto(zumbi.rect.center, "assets/img/Zombie_1/Hurt.png", 4)
+                impacto = Impacto(zumbi.rect.center, "assets/img/Zombie_1/Hurt_invertida.png", 4)
                 self.zumbies.add(impacto) 
 
         # Atualizar as animações do personagem e verificar o término da animação de tiro
