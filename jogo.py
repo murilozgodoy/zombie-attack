@@ -314,7 +314,7 @@ class TelaJogo(Tela):
         self.zumbies = pygame.sprite.Group()
         self.tiros = pygame.sprite.Group()
         self.impactos = pygame.sprite.Group() 
-        image = pygame.image.load("assets/img/fundo.png")
+        image = pygame.image.load("assets/img/Fundo.png")
         self.fundo = pygame.transform.scale(image, (self.largura, self.altura))
         self.moving_left = False
         self.moving_right = False
@@ -397,7 +397,7 @@ class TelaJogo(Tela):
                     self.personagem.trocar_animacao("assets/img/Shot_1.png", 4)  # Reinicia animação
                     x = self.personagem.rect.centerx
                     y = self.personagem.rect.centery
-                    novo_tiro = Tiro(x+30,y+140)
+                    novo_tiro = Tiro(x+100,y+140)
                     self.tiros.add(novo_tiro)
                 else:
                     self.animacao_tiro = False  # Conclui a animação de tiro
