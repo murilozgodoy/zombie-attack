@@ -82,7 +82,7 @@ class Tiro(pygame.sprite.Sprite):
     def __init__(self,x,y):
         super().__init__()
         self.imagem_tiro = pygame.image.load("assets/img/bala.png") # precisa ser self.image toda sprite, não self.imagem ou algo do tipo
-        self.image = pygame.transform.scale(self.imagem_tiro, (65,40))
+        self.image = pygame.transform.scale(self.imagem_tiro, (20,20))
         self.rect = self.image.get_rect()
         self.rect.center = (x, y)
         self.velocidade_x = 10
@@ -105,7 +105,7 @@ class Impacto(pygame.sprite.Sprite):
         self.rect = self.image.get_rect()
         self.rect.center = center
         self.tempo_anterior = pygame.time.get_ticks()
-        self.intervalo = 50 
+        self.intervalo = 200
 
     def carregar_frames(self, spritesheet, frames):
         image = pygame.image.load(spritesheet).convert_alpha()
@@ -127,7 +127,8 @@ class Impacto(pygame.sprite.Sprite):
             if self.frame_atual < len(self.frames):
                 self.image = self.frames[self.frame_atual]
             else:
-                self.kill()
+                if agora > 500:
+                    self.kill()
 
 
 class Cronometro:
@@ -377,10 +378,10 @@ class TelaJogo(Tela):
             novo_zumbi = Zumbies("assets/img/Zombie_1/Walk.png", 10)
             self.zumbies.add(novo_zumbi)
 
-        colisao_tiro_zumbi = pygame.sprite.groupcollide(self.tiros, self.zumbies, True, True)
+        colisao_tiro_zumbi = pygame.sprite.groupcollide(self.tiros, self.zumbies, True, True,pygame.sprite.collide_mask)
         for tiro, zumbis_atingidos in colisao_tiro_zumbi.items():
             for zumbi in zumbis_atingidos:
-                impacto = Impacto(zumbi.rect.center, "assets/img/Zombie_1/Hurt_invertida.png", 4)
+                impacto = Impacto(zumbi.rect.center, "assets/img/Zombie_1/Dead.png",5)
                 self.zumbies.add(impacto) 
 
         # Atualizar as animações do personagem e verificar o término da animação de tiro
