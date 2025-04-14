@@ -79,10 +79,10 @@ def colisao_ponto_retangulo(ponto_x, ponto_y, rect_x, rect_y, rect_w, rect_h):
     return False
 
 class Tiro(pygame.sprite.Sprite):
-    def __init__(self,x,y, destino_x, destino_y):
+    def __init__(self,x,y, destino_x, destino_y, imagem):
         super().__init__()
-        self.imagem_tiro = pygame.image.load("assets/img/bala.png") # precisa ser self.image toda sprite, não self.imagem ou algo do tipo
-        self.image = pygame.transform.scale(self.imagem_tiro, (20,20))
+         # precisa ser self.image toda sprite, não self.imagem ou algo do tipo
+        self.image = pygame.transform.scale(imagem, (20,20))
         self.rect = self.image.get_rect()
         self.rect.center = (x, y)
 
@@ -121,7 +121,7 @@ class Impacto(pygame.sprite.Sprite):
         self.intervalo = 200
 
     def carregar_frames(self, spritesheet, frames):
-        image = pygame.image.load(spritesheet).convert_alpha()
+        image = spritesheet.convert_alpha()
         largura = pygame.Surface.get_width(image) * 5
         altura = pygame.Surface.get_height(image) * 5
         spritesheet = pygame.transform.scale(image, (largura, altura))
@@ -180,7 +180,7 @@ class Personagens(pygame.sprite.Sprite):
         self.vidas = 3
 
     def carregar_frames(self, image, frames):
-        image = pygame.image.load(image).convert_alpha()
+        image = image.convert_alpha()
         largura = image.get_width() * 5
         altura = image.get_height() * 5
         self.spritesheet = pygame.transform.scale(image, (largura, altura))
@@ -216,6 +216,7 @@ class Zumbies(pygame.sprite.Sprite):
         self.path = image
         self.carregar_frames(image, frames)
         self.tempo_ultimo_update = pygame.time.get_ticks()
+        self.walk = pygame.image.load('assets/img/Zombie_1/Walk.png')
         self.intervalo_animacao = 100
         largura = self.frames[0].get_width()
         altura = self.frames[0].get_height()
@@ -227,7 +228,7 @@ class Zumbies(pygame.sprite.Sprite):
         self.animacao_dano = False
 
     def carregar_frames(self, image, frames):
-        image = pygame.image.load(image).convert_alpha()
+        image = image.convert_alpha()
         largura = pygame.Surface.get_width(image) * 5
         altura = pygame.Surface.get_height(image) * 5
         self.spritesheet = pygame.transform.scale(image, (largura, altura))
@@ -249,7 +250,7 @@ class Zumbies(pygame.sprite.Sprite):
 
             if self.frame_atual >= len(self.frames):
                 if self.animacao_dano:
-                    self.trocar_animacao('assets/img/Zombie_1/Walk.png', 10)
+                    self.trocar_animacao(self.walk, 10)
                     self.estado = 'andando'
                     self.animacao_dano = False
                 else:
@@ -342,29 +343,39 @@ class TelaJogo(Tela):
         info = pygame.display.Info()
         self.largura = info.current_w
         self.altura = info.current_h
-        self.personagem = Personagens("assets/img/Idle.png", 7)
         self.zumbies = pygame.sprite.Group()
         self.tiros = pygame.sprite.Group()
         self.impactos = pygame.sprite.Group() 
-        image = pygame.image.load("assets/img/Fundo.png")
-        self.fundo = pygame.transform.scale(image, (self.largura, self.altura))
+        self.assets = {'img_fundo': pygame.image.load("assets/img/Fundo.png"),
+                  "fonte": pygame.font.Font("assets/font/PressStart2P.ttf", 30),
+                  "mira": pygame.image.load('assets/img/mira.png'),
+                  'bala': pygame.image.load("assets/img/bala.png"),
+                  'tiro': pygame.image.load("assets/img/Shot_1.png"),
+                  "parado": pygame.image.load("assets/img/Idle.png"),
+                  'walk_inverted': pygame.image.load("assets/img/Walk_inverted.png"),
+                  'walk': pygame.image.load("assets/img/Walk.png"),
+                  'zumbi_morto': pygame.image.load("assets/img/Zombie_1/Dead.png"),
+                  "zumbi_ferido": pygame.image.load('assets/img/Zombie_1/Hurt_invertida.png'),
+                  "walk":pygame.image.load("assets/img/Walk.png"),
+                  "zombie_walk":pygame.image.load('assets/img/Zombie_1/Walk.png'),     
+        }
+        self.personagem = Personagens(self.assets['parado'], 7)
+        self.fundo = pygame.transform.scale(self.assets['img_fundo'], (self.largura, self.altura))
         self.moving_left = False
         self.moving_right = False
         self.moving_up = False
         self.moving_down = False
-        self.fonte = pygame.font.Font("assets/font/PressStart2P.ttf", 30)
         self.fps_monitor = FPS()
         self.cooldown = 250
         self.ultimo_update = pygame.time.get_ticks()
 
         pygame.mouse.set_visible(False)
-        self.mira = pygame.image.load('assets/img/mira.png')
-        self.mira = pygame.transform.scale(self.mira, (27, 27))
+        self.mira = pygame.transform.scale(self.assets["mira"], (27, 27))
 
         self.animacao_tiro = False
         self.animacao_repetir = False
 
-        self.cronometro = Cronometro(1, self.fonte)
+        self.cronometro = Cronometro(1, self.assets["fonte"])
 
         self.ultima_geracao = pygame.time.get_ticks()
         self.intervalo_geracao = 4000 # 3000 porque seriam 3000 milisegundos
@@ -377,29 +388,29 @@ class TelaJogo(Tela):
                 if destino_x >= self.personagem.rect.centerx:
                     if agora - self.ultimo_update > self.cooldown:
                         # if not self.animacao_tiro:
-                        self.personagem.trocar_animacao("assets/img/Shot_1.png", 4)
+                        self.personagem.trocar_animacao(self.assets['tiro'], 4)
                         self.animacao_tiro = True
 
                         x = self.personagem.rect.centerx
                         y = self.personagem.rect.centery
 
                         destino_x, destino_y = pygame.mouse.get_pos()
-                        novo_tiro = Tiro(x + 20, y + 130, destino_x, destino_y)
+                        novo_tiro = Tiro(x + 20, y + 130, destino_x, destino_y, self.assets['bala'])
                         self.tiros.add(novo_tiro)
 
                         self.animacao_repetir = False
                         self.ultimo_update = agora
                     else:
-                        self.personagem.trocar_animacao("assets/img/Idle.png", 7)
+                        self.personagem.trocar_animacao(self.assets["parado"], 7)
             if evento.type == pygame.KEYDOWN:
                 if evento.key == pygame.K_a:  
                     self.moving_left = True
                     self.moving_right = False
-                    self.personagem.trocar_animacao("assets/img/Walk_inverted.png", 7)
+                    self.personagem.trocar_animacao(self.assets['walk_inverted'], 7)
                 if evento.key == pygame.K_d: 
                     self.moving_right = True
                     self.moving_left = False
-                    self.personagem.trocar_animacao("assets/img/Walk.png", 7)
+                    self.personagem.trocar_animacao(self.assets["walk"], 7)
                 if evento.key == pygame.K_w: 
                     self.moving_up = True
                 if evento.key == pygame.K_s:  
@@ -413,11 +424,11 @@ class TelaJogo(Tela):
                 if evento.key == pygame.K_a:
                     self.moving_left = False
                     if not self.moving_right:
-                        self.personagem.trocar_animacao("assets/img/Idle.png", 7)
+                        self.personagem.trocar_animacao(self.assets["parado"], 7)
                 if evento.key == pygame.K_d:
                     self.moving_right = False
                     if not self.moving_left:
-                        self.personagem.trocar_animacao("assets/img/Idle.png", 7)
+                        self.personagem.trocar_animacao(self.assets["parado"], 7)
                 if evento.key == pygame.K_w:
                     self.moving_up = False
                 if evento.key == pygame.K_s:
@@ -431,7 +442,7 @@ class TelaJogo(Tela):
         agora = pygame.time.get_ticks()
         if agora - self.ultima_geracao > self.intervalo_geracao:
             self.ultima_geracao = agora
-            novo_zumbi = Zumbies("assets/img/Zombie_1/Walk.png", 10)
+            novo_zumbi = Zumbies(self.assets["zombie_walk"], 10)
             self.zumbies.add(novo_zumbi)
 
         colisao_tiro_zumbi = pygame.sprite.groupcollide(self.tiros, self.zumbies, True, False,pygame.sprite.collide_mask)
@@ -439,26 +450,26 @@ class TelaJogo(Tela):
             for zumbi in zumbis_atingidos:
                 zumbi.vidas -= 1
                 if zumbi.vidas <= 0:
-                    impacto = Impacto(zumbi.rect.center, "assets/img/Zombie_1/Dead.png",5)
-                    self.zumbies.add(impacto) 
+                    impacto = Impacto(zumbi.rect.center,self.assets["zumbi_morto"],5)
+                    self.impactos.add(impacto) 
                     self.zumbies.remove(zumbi)
                 else:
-                    if zumbi.estado != 'ferido':
-                        zumbi.trocar_animacao('assets/img/Zombie_1/Hurt_invertida.png', 4, dano=True, novo_estado='ferido')
+                    if zumbi.estado != 'ferido': #'assets/img/Zombie_1/Hurt_invertida.png'
+                        zumbi.trocar_animacao(self.assets["zumbi_ferido"], 4, dano=True, novo_estado='ferido')
 
         # Atualizar as animações do personagem e verificar o término da animação de tiro
         if self.animacao_tiro:
                 if self.personagem.frame_atual == len(self.personagem.frames) - 1:  # Último quadro
                     if self.animacao_repetir:  # Se a tecla ainda estiver pressionada, reinicia
-                        self.personagem.trocar_animacao("assets/img/Shot_1.png", 4)  # Reinicia animação
+                        self.personagem.trocar_animacao(self.assets['tiro'], 4)  # Reinicia animação
                         x = self.personagem.rect.centerx
                         y = self.personagem.rect.centery
                         destino_x, destino_y = pygame.mouse.get_pos()
-                        novo_tiro = Tiro(x+100,y+140, destino_x, destino_y)
+                        novo_tiro = Tiro(x+100,y+140, destino_x, destino_y, self.assets['bala'])
                         self.tiros.add(novo_tiro)
                     else:
                         self.animacao_tiro = False  # Conclui a animação de tiro
-                        self.personagem.trocar_animacao("assets/img/Idle.png", 7)  # Retorna à animação parado
+                        self.personagem.trocar_animacao(self.assets['parado'], 7)  # Retorna à animação parado
 
         self.personagem.update()
         self.zumbies.update()
@@ -483,7 +494,7 @@ class TelaJogo(Tela):
         janela.fill((0, 0, 0))
         janela.blit(self.fundo, (0, 0))
         self.fps_monitor.calcula_fps()
-        texto_fps = self.fonte.render(f'FPS: {self.fps_monitor.fps:.2f}', True, (255, 255, 255))
+        texto_fps = self.assets["fonte"].render(f'FPS: {self.fps_monitor.fps:.2f}', True, (255, 255, 255))
         texto_fps = pygame.transform.scale(texto_fps, (150, 30))
         janela.blit(texto_fps, ((self.largura - 150), (self.altura - 30)))
         
