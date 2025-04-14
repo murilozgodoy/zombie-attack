@@ -1,6 +1,8 @@
 
 import pygame
 import random
+import math
+## Inicia o Pygame e pega o tamanho da tela 
 pygame.init()
 info = pygame.display.Info()
 largura_tela = info.current_w
@@ -17,6 +19,9 @@ class Tiro(pygame.sprite.Sprite):
         dx = destino_x - x
         dy = destino_y - y
         distancia = max((dx ** 2 + dy ** 2) ** 0.5, 1)
+        angulo = math.degrees(math.atan2(-dy, dx))
+        self.image = pygame.transform.rotate(imagem, angulo)
+        self.rect = self.image.get_rect(center=(x, y))
 
         self.velocidade = 100
         self.velocidade_x = (dx / distancia) * self.velocidade
@@ -109,9 +114,11 @@ class Personagens(pygame.sprite.Sprite):
             self.frame_atual = (self.frame_atual + 1) % len(self.frames)
             self.image = self.frames[self.frame_atual]
 
-    def mover(self, dx, dy):
-        self.rect.x += dx
-        self.rect.y += dy
+    def mover(self, velocidadex, velocidadey):
+        agora = pygame.time.get_ticks()
+        delta_time = (agora - self.tempo_ultimo_update) / 1000
+        self.rect.x -= velocidadex * delta_time
+        self.rect.y += velocidadey * delta_time
 
     def desenha(self, janela):
         janela.blit(self.image, self.rect)
@@ -382,16 +389,16 @@ class TelaJogo(Tela):
         # Verificar movimento horizontal
         if self.moving_left or self.moving_right:
             if self.moving_left:
-                self.personagem.mover(-1, 0)
+                self.personagem.mover(30, 0)
             if self.moving_right:
-                self.personagem.mover(1, 0)
+                self.personagem.mover(-30, 0)
 
         # Verificar movimento vertical
         if self.moving_up or self.moving_down:
             if self.moving_up and self.personagem.rect.y > 35:
-                self.personagem.mover(0, -1)
+                self.personagem.mover(0, -30)
             if self.moving_down and self.personagem.rect.y + self.personagem.rect.height < altura_tela:
-                self.personagem.mover(0, 1)
+                self.personagem.mover(0, 30)
 
     def desenha(self, janela):
         janela.fill((0, 0, 0))
