@@ -221,6 +221,10 @@ class Zumbies(pygame.sprite.Sprite):
         altura = self.frames[0].get_height()
         self.rect = pygame.Rect(largura_tela, 200, largura, altura)
         self.vidas = 2
+        self.velocidade = 10
+
+        self.estado = 'andando'
+        self.animacao_dano = False
 
     def carregar_frames(self, image, frames):
         image = pygame.image.load(image).convert_alpha()
@@ -230,17 +234,30 @@ class Zumbies(pygame.sprite.Sprite):
         self.frames = [self.spritesheet.subsurface((i * altura, 0, altura, altura)) for i in range(frames)]
         self.image = self.frames[0]
 
-    def trocar_animacao(self, path, frames):
+    def trocar_animacao(self, path, frames, dano=False, novo_estado = None):
         self.carregar_frames(path, frames)
         self.frame_atual = 0
+        self.animacao_dano = dano
+        if novo_estado:
+            self.estado = novo_estado
 
     def update(self):
         agora = pygame.time.get_ticks()
         if agora - self.tempo_ultimo_update > self.intervalo_animacao:
             self.tempo_ultimo_update = agora
-            self.frame_atual = (self.frame_atual + 1) % len(self.frames)
+            self.frame_atual += 1
+
+            if self.frame_atual >= len(self.frames):
+                if self.animacao_dano:
+                    self.trocar_animacao('assets/img/Zombie_1/Walk.png', 10)
+                    self.estado = 'andando'
+                    self.animacao_dano = False
+                else:
+                    self.frame_atual = 0
             self.image = self.frames[self.frame_atual]
-            self.rect.x -= 10
+        if self.estado == 'andando':
+            delta_time = (agora - self.tempo_ultimo_update) / 1000
+            self.rect.x -= self.velocidade * delta_time
 
     def desenha(self, janela):
         janela.blit(self.image, self.rect)
@@ -420,7 +437,8 @@ class TelaJogo(Tela):
                     self.zumbies.add(impacto) 
                     self.zumbies.remove(zumbi)
                 else:
-                    zumbi.trocar_animacao('assets/img/Zombie_1/Hurt_invertida.png', 4)
+                    if zumbi.estado != 'ferido':
+                        zumbi.trocar_animacao('assets/img/Zombie_1/Hurt_invertida.png', 4, dano=True, novo_estado='ferido')
 
         # Atualizar as animações do personagem e verificar o término da animação de tiro
         if self.animacao_tiro:
