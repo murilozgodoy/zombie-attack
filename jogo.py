@@ -287,7 +287,7 @@ class TelaJogo(Tela):
         for evento in eventos:
             if evento.type == pygame.MOUSEBUTTONDOWN and evento.button == 1:
                 destino_x, destino_y = pygame.mouse.get_pos()
-                if destino_x >= self.personagem.rect.centerx:
+                if (destino_x >= self.personagem.rect.centerx) and destino_y >= 400:
                     if agora - self.ultimo_update > self.cooldown:
                         # if not self.animacao_tiro:
                         self.personagem.trocar_animacao(self.assets['tiro'], 4)
