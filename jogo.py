@@ -79,13 +79,25 @@ def colisao_ponto_retangulo(ponto_x, ponto_y, rect_x, rect_y, rect_w, rect_h):
     return False
 
 class Tiro(pygame.sprite.Sprite):
-    def __init__(self,x,y):
+    def __init__(self,x,y, destino_x, destino_y):
         super().__init__()
         self.imagem_tiro = pygame.image.load("assets/img/bala.png") # precisa ser self.image toda sprite, não self.imagem ou algo do tipo
         self.image = pygame.transform.scale(self.imagem_tiro, (20,20))
         self.rect = self.image.get_rect()
         self.rect.center = (x, y)
-        self.velocidade_x = 10
+
+        dx = destino_x - x
+        dy = destino_y - y
+        distancia = (dx ** 2 + dy ** 2) ** 0.5
+        if distancia == 0:
+            distancia = 1
+
+        self.velocidade = 10
+        self.velocidade_x = (dx / distancia) * self.velocidade
+        self.velocidade_y = (dy / distancia) * self.velocidade
+
+        
+        # self.velocidade_x = 10
         # self.velocidade_y = algum numero (se quisermos fazer um tiro em diagonal)
     
     def update(self):
@@ -93,7 +105,8 @@ class Tiro(pygame.sprite.Sprite):
         largura_tela = info.current_w
         altura_tela = info.current_h
         self.rect.x += self.velocidade_x
-        if self.rect.right >= largura_tela:
+        self.rect.y += self.velocidade_y
+        if (self.rect.right < 0 or self.rect.left > largura_tela or self.rect.bottom < 0 or self.rect.top > altura_tela):
             self.kill()
 
 class Impacto(pygame.sprite.Sprite):
@@ -127,7 +140,7 @@ class Impacto(pygame.sprite.Sprite):
             if self.frame_atual < len(self.frames):
                 self.image = self.frames[self.frame_atual]
             else:
-                if agora > 500:
+                if agora > 5:
                     self.kill()
 
 
@@ -322,6 +335,8 @@ class TelaJogo(Tela):
         self.moving_down = False
         self.fonte = pygame.font.Font("assets/font/PressStart2P.ttf", 30)
         self.fps_monitor = FPS()
+        self.cooldown = 250
+        self.ultimo_update = pygame.time.get_ticks()
 
         self.animacao_tiro = False
         self.animacao_repetir = False
@@ -332,17 +347,26 @@ class TelaJogo(Tela):
         self.intervalo_geracao = 4000 # 3000 porque seriam 3000 milisegundos
 
     def trata_eventos(self, eventos):
+        agora = pygame.time.get_ticks()
         for evento in eventos:
-            if evento.type == pygame.KEYDOWN:
-                if evento.key == pygame.K_p:
-                    if not self.animacao_tiro:  # Inicia a animação apenas se não estiver ativa
-                        self.personagem.trocar_animacao("assets/img/Shot_1.png", 4)  # Animação de tiro
-                        self.animacao_tiro = True  # Marca que a animação está em progresso
+            if evento.type == pygame.MOUSEBUTTONDOWN and evento.button == 1:
+                if agora - self.ultimo_update > self.cooldown:
+                    # if not self.animacao_tiro:
+                    self.personagem.trocar_animacao("assets/img/Shot_1.png", 4)
+                    self.animacao_tiro = True
+
                     x = self.personagem.rect.centerx
                     y = self.personagem.rect.centery
-                    novo_tiro = Tiro(x+20,y+130)
+
+                    destino_x, destino_y = pygame.mouse.get_pos()
+                    novo_tiro = Tiro(x + 20, y + 130, destino_x, destino_y)
                     self.tiros.add(novo_tiro)
-                    self.animacao_repetir = True  # Indica que a tecla está pressionada
+
+                    self.animacao_repetir = False
+                    self.ultimo_update = agora
+                else:
+                    self.personagem.trocar_animacao("assets/img/Idle.png", 7)
+            if evento.type == pygame.KEYDOWN:
                 if evento.key == pygame.K_a:  
                     self.moving_left = True
                     self.moving_right = False
@@ -355,11 +379,12 @@ class TelaJogo(Tela):
                     self.moving_up = True
                 if evento.key == pygame.K_s:  
                     self.moving_down = True
-
+            # if evento.type == pygame.MOUSEBUTTONUP and evento.button == 1:
+            #         self.animacao_repetir = False  # Para de repetir quando a tecla for solta
+            #         # self.ultima_update = agora
             if evento.type == pygame.KEYUP:
-                if evento.key == pygame.K_p:
-                    self.animacao_repetir = False  # Para de repetir quando a tecla for solta
-
+                # if agora - self.ultimo_update > self.cooldown:
+                        
                 if evento.key == pygame.K_a:
                     self.moving_left = False
                     if not self.moving_right:
@@ -392,16 +417,17 @@ class TelaJogo(Tela):
 
         # Atualizar as animações do personagem e verificar o término da animação de tiro
         if self.animacao_tiro:
-            if self.personagem.frame_atual == len(self.personagem.frames) - 1:  # Último quadro
-                if self.animacao_repetir:  # Se a tecla ainda estiver pressionada, reinicia
-                    self.personagem.trocar_animacao("assets/img/Shot_1.png", 4)  # Reinicia animação
-                    x = self.personagem.rect.centerx
-                    y = self.personagem.rect.centery
-                    novo_tiro = Tiro(x+100,y+140)
-                    self.tiros.add(novo_tiro)
-                else:
-                    self.animacao_tiro = False  # Conclui a animação de tiro
-                    self.personagem.trocar_animacao("assets/img/Idle.png", 7)  # Retorna à animação parado
+                if self.personagem.frame_atual == len(self.personagem.frames) - 1:  # Último quadro
+                    if self.animacao_repetir:  # Se a tecla ainda estiver pressionada, reinicia
+                        self.personagem.trocar_animacao("assets/img/Shot_1.png", 4)  # Reinicia animação
+                        x = self.personagem.rect.centerx
+                        y = self.personagem.rect.centery
+                        destino_x, destino_y = pygame.mouse.get_pos()
+                        novo_tiro = Tiro(x+100,y+140, destino_x, destino_y)
+                        self.tiros.add(novo_tiro)
+                    else:
+                        self.animacao_tiro = False  # Conclui a animação de tiro
+                        self.personagem.trocar_animacao("assets/img/Idle.png", 7)  # Retorna à animação parado
 
         self.personagem.update()
         self.zumbies.update()
