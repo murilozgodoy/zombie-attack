@@ -373,22 +373,24 @@ class TelaJogo(Tela):
         agora = pygame.time.get_ticks()
         for evento in eventos:
             if evento.type == pygame.MOUSEBUTTONDOWN and evento.button == 1:
-                if agora - self.ultimo_update > self.cooldown:
-                    # if not self.animacao_tiro:
-                    self.personagem.trocar_animacao("assets/img/Shot_1.png", 4)
-                    self.animacao_tiro = True
+                destino_x, destino_y = pygame.mouse.get_pos()
+                if destino_x >= self.personagem.rect.centerx:
+                    if agora - self.ultimo_update > self.cooldown:
+                        # if not self.animacao_tiro:
+                        self.personagem.trocar_animacao("assets/img/Shot_1.png", 4)
+                        self.animacao_tiro = True
 
-                    x = self.personagem.rect.centerx
-                    y = self.personagem.rect.centery
+                        x = self.personagem.rect.centerx
+                        y = self.personagem.rect.centery
 
-                    destino_x, destino_y = pygame.mouse.get_pos()
-                    novo_tiro = Tiro(x + 20, y + 130, destino_x, destino_y)
-                    self.tiros.add(novo_tiro)
+                        destino_x, destino_y = pygame.mouse.get_pos()
+                        novo_tiro = Tiro(x + 20, y + 130, destino_x, destino_y)
+                        self.tiros.add(novo_tiro)
 
-                    self.animacao_repetir = False
-                    self.ultimo_update = agora
-                else:
-                    self.personagem.trocar_animacao("assets/img/Idle.png", 7)
+                        self.animacao_repetir = False
+                        self.ultimo_update = agora
+                    else:
+                        self.personagem.trocar_animacao("assets/img/Idle.png", 7)
             if evento.type == pygame.KEYDOWN:
                 if evento.key == pygame.K_a:  
                     self.moving_left = True
