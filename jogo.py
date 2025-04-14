@@ -357,6 +357,10 @@ class TelaJogo(Tela):
         self.cooldown = 250
         self.ultimo_update = pygame.time.get_ticks()
 
+        pygame.mouse.set_visible(False)
+        self.mira = pygame.image.load('assets/img/mira.png')
+        self.mira = pygame.transform.scale(self.mira, (27, 27))
+
         self.animacao_tiro = False
         self.animacao_repetir = False
 
@@ -485,6 +489,9 @@ class TelaJogo(Tela):
         
 
 
+        mouse_x, mouse_y = pygame.mouse.get_pos()
+        mira_rect = self.mira.get_rect(center=(mouse_x, mouse_y))
+        janela.blit(self.mira, mira_rect)
 
         self.personagem.desenha(janela)
         self.zumbies.draw(janela)
