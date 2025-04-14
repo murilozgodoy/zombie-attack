@@ -177,6 +177,7 @@ class Personagens(pygame.sprite.Sprite):
         largura = self.frames[0].get_width()
         altura = self.frames[0].get_height()
         self.rect = pygame.Rect(320, 200, largura, altura)  # Facilita movimentação e colisão
+        self.vidas = 3
 
     def carregar_frames(self, image, frames):
         image = pygame.image.load(image).convert_alpha()
@@ -219,6 +220,7 @@ class Zumbies(pygame.sprite.Sprite):
         largura = self.frames[0].get_width()
         altura = self.frames[0].get_height()
         self.rect = pygame.Rect(largura_tela, 200, largura, altura)
+        self.vidas = 2
 
     def carregar_frames(self, image, frames):
         image = pygame.image.load(image).convert_alpha()
@@ -409,11 +411,16 @@ class TelaJogo(Tela):
             novo_zumbi = Zumbies("assets/img/Zombie_1/Walk.png", 10)
             self.zumbies.add(novo_zumbi)
 
-        colisao_tiro_zumbi = pygame.sprite.groupcollide(self.tiros, self.zumbies, True, True,pygame.sprite.collide_mask)
+        colisao_tiro_zumbi = pygame.sprite.groupcollide(self.tiros, self.zumbies, True, False,pygame.sprite.collide_mask)
         for tiro, zumbis_atingidos in colisao_tiro_zumbi.items():
             for zumbi in zumbis_atingidos:
-                impacto = Impacto(zumbi.rect.center, "assets/img/Zombie_1/Dead.png",5)
-                self.zumbies.add(impacto) 
+                zumbi.vidas -= 1
+                if zumbi.vidas <= 0:
+                    impacto = Impacto(zumbi.rect.center, "assets/img/Zombie_1/Dead.png",5)
+                    self.zumbies.add(impacto) 
+                    self.zumbies.remove(zumbi)
+                else:
+                    zumbi.trocar_animacao('assets/img/Zombie_1/Hurt_invertida.png', 4)
 
         # Atualizar as animações do personagem e verificar o término da animação de tiro
         if self.animacao_tiro:
@@ -432,6 +439,7 @@ class TelaJogo(Tela):
         self.personagem.update()
         self.zumbies.update()
         self.tiros.update()
+        self.impactos.update()
 
         # Verificar movimento horizontal
         if self.moving_left or self.moving_right:
