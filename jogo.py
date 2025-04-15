@@ -280,7 +280,7 @@ class TelaJogo(Tela):
             "tiro": pygame.transform.scale(self.sprites["personagem_atirando"],(self.sprites["personagem_atirando"].get_width()*5,self.sprites["personagem_atirando"].get_height()*5)),
             "parado": pygame.transform.scale(self.sprites["personagem_parado"], (self.sprites["personagem_parado"].get_width()*5, self.sprites["personagem_parado"].get_height()*5)),
             "walk_inverted": pygame.transform.scale(self.sprites["personagem_andar_para_tras"], (self.sprites["personagem_andar_para_tras"].get_width()*5, self.sprites["personagem_andar_para_tras"].get_height()*5)),
-            "walk": pygame.transform.scale(self.sprites["personagem_andar"], (self.sprites["personagem_andar"] * 5, self.sprites["personagem_andar"].get_height() * 5)),
+            "walk": pygame.transform.scale(self.sprites["personagem_andar"], (self.sprites["personagem_andar"].get_width() * 5, self.sprites["personagem_andar"].get_height() * 5)),
             "zumbi_morto": pygame.transform.scale(self.sprites["zumbi_morto"], (self.sprites["zumbi_morto"].get_width()*5, self.sprites["zumbi_morto"].get_height()*5)),
             "zumbi_ferido": pygame.transform.scale(self.sprites["zumbi_ferido"], (self.sprites["zumbi_ferido"].get_width()*5, self.sprites["zumbi_ferido"].get_height()*5)),
             "zombie_walk": pygame.transform.scale(self.sprites["zumbi_andar"], (self.sprites["zumbi_andar"].get_width()*5, self.sprites["zumbi_andar"].get_height()*5))
@@ -445,7 +445,7 @@ class Jogo:
         info = pygame.display.Info()
         self.tela = {
             "largura": info.current_w,
-            "altura": info.current_h
+            "altura": info.current_h,
         }
         self.janela = pygame.display.set_mode((self.tela["largura"], self.tela["altura"]), pygame.FULLSCREEN)
         pygame.display.set_caption("Zombie Attack")
