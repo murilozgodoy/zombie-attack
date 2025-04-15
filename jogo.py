@@ -7,8 +7,7 @@ import math
 # info = pygame.display.Info()
 # largura_tela = info.current_w
 # altura_tela = info.current_h
-def colisao_ponto_retangulo(ponto_x, ponto_y, rect_x, rect_y, rect_w, rect_h):
-    return rect_x <= ponto_x <= rect_x + rect_w and rect_y <= ponto_y <= rect_y + rect_h
+
 
 class Tiro(pygame.sprite.Sprite):
     def __init__(self, x, y, destino_x, destino_y, imagem):
@@ -213,9 +212,11 @@ class TelaInicial(Tela):
         imagem = pygame.image.load("assets/img/Inicial.png")
         self.image = pygame.transform.scale(imagem, (self.tela["largura"], self.tela["altura"]))
         self.jogar = pygame.image.load("assets/img/Botao_jogar.png")
+        self.botao_jogar_rect = pygame.Rect((self.tela["largura"] - 475) // 2,(self.tela["altura"] - 135) // 2,475,135)
     def trata_eventos(self, eventos):
         for evento in eventos:
-            if colisao_ponto_retangulo(pygame.mouse.get_pos()[0], pygame.mouse.get_pos()[1], 535, 374, 475, 135): # Verifica se o mouse está sobre o botão jogar
+            # if colisao_ponto_retangulo(pygame.mouse.get_pos()[0], pygame.mouse.get_pos()[1], 535, 374, 475, 135): # Verifica se o mouse está sobre o botão jogar
+            if self.botao_jogar_rect.collidepoint(pygame.mouse.get_pos()):
                 if evento.type == pygame.MOUSEBUTTONDOWN and evento.button == 1:
                     self.jogo.trocar_tela(TelaJogo(self.jogo,self.tela))
             if colisao_ponto_retangulo(pygame.mouse.get_pos()[0], pygame.mouse.get_pos()[1],535, 550, 475, 135): # Verifica se o mouse está sobre o botão instruções
