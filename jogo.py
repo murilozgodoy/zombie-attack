@@ -211,7 +211,7 @@ class TelaInicial(Tela):
         self.tela = tela
         self.fonte = pygame.font.Font("assets/font/PressStart2P.ttf", 30)
         imagem = pygame.image.load("assets/img/Inicial.png")
-        self.image = pygame.transform.scale(imagem, (tela["largura"], tela["altura"]))
+        self.image = pygame.transform.scale(imagem, (self.tela["largura"], self.tela["altura"]))
         self.jogar = pygame.image.load("assets/img/Botao_jogar.png")
     def trata_eventos(self, eventos):
         for evento in eventos:
@@ -263,18 +263,27 @@ class TelaJogo(Tela):
         self.zumbies = pygame.sprite.Group()
         self.tiros = pygame.sprite.Group()
         self.impactos = pygame.sprite.Group() 
+        self.sprites = {
+            "personagem_atirando":pygame.image.load("assets/img/Shot_1.png"),
+            "personagem_parado":pygame.image.load("assets/img/Idle.png"),
+            "personagem_andar_para_tras":pygame.image.load("assets/img/Walk_inverted.png"),
+            "personagem_andar":pygame.image.load("assets/img/Walk.png"),
+            "zumbi_morto":pygame.image.load("assets/img/Zombie_1/Dead.png"),
+            "zumbi_ferido":pygame.image.load("assets/img/Zombie_1/Hurt_invertida.png"),
+            "zumbi_andar":pygame.image.load("assets/img/Zombie_1/Walk.png"),
+        }
         self.assets = {
             "img_fundo": pygame.transform.scale(pygame.image.load("assets/img/Fundo.png"), (self.tela["largura"], self.tela["altura"])),
             "fonte": pygame.font.Font("assets/font/PressStart2P.ttf", 30),
             "mira": pygame.transform.scale(pygame.image.load("assets/img/mira.png"), (27, 27)),
             "bala": pygame.transform.scale(pygame.image.load("assets/img/bala.png"), (20, 20)),
-            "tiro": pygame.transform.scale(pygame.image.load("assets/img/Shot_1.png"),(pygame.image.load("assets/img/Shot_1.png").get_width()*5,pygame.image.load("assets/img/Shot_1.png").get_height()*5)),
-            "parado": pygame.transform.scale(pygame.image.load("assets/img/Idle.png"), (pygame.image.load("assets/img/Idle.png").get_width()*5, pygame.image.load("assets/img/Idle.png").get_height()*5)),
-            "walk_inverted": pygame.transform.scale(pygame.image.load("assets/img/Walk_inverted.png"), (pygame.image.load("assets/img/Walk_inverted.png").get_width()*5, pygame.image.load("assets/img/Walk_inverted.png").get_height()*5)),
-            "walk": pygame.transform.scale(pygame.image.load("assets/img/Walk.png"), (pygame.image.load("assets/img/Walk.png").get_width() * 5, pygame.image.load("assets/img/Walk.png").get_height() * 5)),
-            "zumbi_morto": pygame.transform.scale(pygame.image.load("assets/img/Zombie_1/Dead.png"), (pygame.image.load("assets/img/Zombie_1/Dead.png").get_width()*5, pygame.image.load("assets/img/Zombie_1/Dead.png").get_height()*5)),
-            "zumbi_ferido": pygame.transform.scale(pygame.image.load("assets/img/Zombie_1/Hurt_invertida.png"), (pygame.image.load("assets/img/Zombie_1/Hurt_invertida.png").get_width()*5, pygame.image.load("assets/img/Zombie_1/Hurt_invertida.png").get_height()*5)),
-            "zombie_walk": pygame.transform.scale(pygame.image.load("assets/img/Zombie_1/Walk.png"), (pygame.image.load("assets/img/Zombie_1/Walk.png").get_width()*5, pygame.image.load("assets/img/Zombie_1/Walk.png").get_height()*5))
+            "tiro": pygame.transform.scale(self.sprites["personagem_atirando"],(self.sprites["personagem_atirando"].get_width()*5,self.sprites["personagem_atirando"].get_height()*5)),
+            "parado": pygame.transform.scale(self.sprites["personagem_parado"], (self.sprites["personagem_parado"].get_width()*5, self.sprites["personagem_parado"].get_height()*5)),
+            "walk_inverted": pygame.transform.scale(self.sprites["personagem_andar_para_tras"], (self.sprites["personagem_andar_para_tras"].get_width()*5, self.sprites["personagem_andar_para_tras"].get_height()*5)),
+            "walk": pygame.transform.scale(self.sprites["personagem_andar"], (self.sprites["personagem_andar"] * 5, self.sprites["personagem_andar"].get_height() * 5)),
+            "zumbi_morto": pygame.transform.scale(self.sprites["zumbi_morto"], (self.sprites["zumbi_morto"].get_width()*5, self.sprites["zumbi_morto"].get_height()*5)),
+            "zumbi_ferido": pygame.transform.scale(self.sprites["zumbi_ferido"], (self.sprites["zumbi_ferido"].get_width()*5, self.sprites["zumbi_ferido"].get_height()*5)),
+            "zombie_walk": pygame.transform.scale(self.sprites["zumbi_andar"], (self.sprites["zumbi_andar"].get_width()*5, self.sprites["zumbi_andar"].get_height()*5))
         }
         self.personagem = Personagens(self.assets['parado'], 7,self.tela)
         self.moving_left = False
