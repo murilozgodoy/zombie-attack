@@ -443,13 +443,13 @@ class Jogo:
     def __init__(self):
         pygame.init()
         info = pygame.display.Info()
-        self.tela = {
+        tela = {
             "largura": info.current_w,
             "altura": info.current_h,
         }
-        self.janela = pygame.display.set_mode((self.tela["largura"], self.tela["altura"]), pygame.FULLSCREEN)
+        self.janela = pygame.display.set_mode((tela["largura"], tela["altura"]), pygame.FULLSCREEN)
         pygame.display.set_caption("Zombie Attack")
-        self.tela_atual = TelaInicial(self,self.tela)
+        self.tela_atual = TelaInicial(self,tela)
 
     def trocar_tela(self, nova_tela):
         self.tela_atual = nova_tela
