@@ -3,10 +3,10 @@ import pygame
 import random
 import math
 ## Inicia o Pygame e pega o tamanho da tela 
-pygame.init()
-info = pygame.display.Info()
-largura_tela = info.current_w
-altura_tela = info.current_h
+# pygame.init()
+# info = pygame.display.Info()
+# largura_tela = info.current_w
+# altura_tela = info.current_h
 def colisao_ponto_retangulo(ponto_x, ponto_y, rect_x, rect_y, rect_w, rect_h):
     return rect_x <= ponto_x <= rect_x + rect_w and rect_y <= ponto_y <= rect_y + rect_h
 
@@ -84,15 +84,16 @@ class Cronometro:
         janela.blit(renderizado, (x, y))
 
 class Personagens(pygame.sprite.Sprite):
-    def __init__(self, image, frames):
+    def __init__(self, image, frames,tela):
         super().__init__()
         self.carregar_frames(image, frames)
         self.frame_atual = 0
         self.tempo_ultimo_update = pygame.time.get_ticks()
         self.intervalo_animacao = 100
+        self.tela =  tela
         largura = self.frames[0].get_width()
         altura = self.frames[0].get_height()
-        self.rect = pygame.Rect(320, 200, largura, altura)
+        self.rect = pygame.Rect(tela["largura"] - 1000, tela["altura"] - 700, largura, altura)
         self.vidas = 3
 
     def carregar_frames(self, image, frames):
@@ -124,7 +125,7 @@ class Personagens(pygame.sprite.Sprite):
         janela.blit(self.image, self.rect)
 
 class Zumbies(pygame.sprite.Sprite):
-    def __init__(self, image, frames):
+    def __init__(self, image, frames,tela):
         super().__init__()
         self.carregar_frames(image, frames)
         self.frame_atual = 0
@@ -133,7 +134,7 @@ class Zumbies(pygame.sprite.Sprite):
         self.intervalo_animacao = 100
         largura = self.frames[0].get_width()
         altura = self.frames[0].get_height()
-        self.rect = pygame.Rect(1920, 200, largura, altura)
+        self.rect = pygame.Rect(tela["largura"], tela["altura"] - 700, largura, altura)
         self.vidas = 2
         self.velocidade = 10
         self.estado = 'andando'
@@ -171,6 +172,8 @@ class Zumbies(pygame.sprite.Sprite):
         if self.estado == 'andando':
             delta_time = (agora - self.tempo_ultimo_update) / 1000
             self.rect.x -= self.velocidade * delta_time
+            if self.rect.x < 0:
+                self.kill()
 
     def desenha(self, janela):
         janela.blit(self.image, self.rect)
@@ -200,19 +203,21 @@ class Tela:
         pass
 
 class TelaInicial(Tela):
-    def __init__(self, jogo):
+    def __init__(self, jogo,tela):
         self.jogo = jogo
         # info = pygame.display.Info()
         # largura = info.current_w
         # altura = info.current_h
+        self.tela = tela
         self.fonte = pygame.font.Font("assets/font/PressStart2P.ttf", 30)
         imagem = pygame.image.load("assets/img/Inicial.png")
-        self.image = pygame.transform.scale(imagem, (largura_tela, altura_tela))
+        self.image = pygame.transform.scale(imagem, (tela["largura"], tela["altura"]))
+        self.jogar = pygame.image.load("assets/img/Botao_jogar.png")
     def trata_eventos(self, eventos):
         for evento in eventos:
             if colisao_ponto_retangulo(pygame.mouse.get_pos()[0], pygame.mouse.get_pos()[1], 535, 374, 475, 135): # Verifica se o mouse está sobre o botão jogar
                 if evento.type == pygame.MOUSEBUTTONDOWN and evento.button == 1:
-                    self.jogo.trocar_tela(TelaJogo(self.jogo))
+                    self.jogo.trocar_tela(TelaJogo(self.jogo,self.tela))
             if colisao_ponto_retangulo(pygame.mouse.get_pos()[0], pygame.mouse.get_pos()[1],535, 550, 475, 135): # Verifica se o mouse está sobre o botão instruções
                 if evento.type == pygame.MOUSEBUTTONDOWN and evento.button == 1:
                     pass # temos que colocar para ir para a pagina de instruções
@@ -220,16 +225,17 @@ class TelaInicial(Tela):
     def desenha(self, janela):
         janela.fill((0, 0, 0))
         janela.blit(self.image, (0, 0))
+        # janela.blit(self.jogar,(300,300))
         pygame.display.flip()
 
 
 class TelaGameOver(Tela):
-    def __init__(self, jogo):
+    def __init__(self, jogo,tela):
         self.jogo = jogo
         # info = pygame.display.Info()
         # largura = info.current_w
         # altura = info.current_h
-        self.image = pygame.transform.scale(pygame.image.load("assets/img/gameover.png"), (largura_tela, altura_tela))
+        self.image = pygame.transform.scale(pygame.image.load("assets/img/gameover.png"), (tela["largura"], tela['altura']))
         self.fonte = pygame.font.Font("assets/font/PressStart2P.ttf", 30)
 
     def trata_eventos(self, eventos):
@@ -248,16 +254,17 @@ class TelaGameOver(Tela):
 
 
 class TelaJogo(Tela):
-    def __init__(self, jogo):
+    def __init__(self, jogo,tela):
         self.jogo = jogo
         # info = pygame.display.Info()
         # self.largura = info.current_w
         # self.altura = info.current_h
+        self.tela = tela
         self.zumbies = pygame.sprite.Group()
         self.tiros = pygame.sprite.Group()
         self.impactos = pygame.sprite.Group() 
         self.assets = {
-            "img_fundo": pygame.transform.scale(pygame.image.load("assets/img/Fundo.png"), (largura_tela, altura_tela)),
+            "img_fundo": pygame.transform.scale(pygame.image.load("assets/img/Fundo.png"), (self.tela["largura"], self.tela["altura"])),
             "fonte": pygame.font.Font("assets/font/PressStart2P.ttf", 30),
             "mira": pygame.transform.scale(pygame.image.load("assets/img/mira.png"), (27, 27)),
             "bala": pygame.transform.scale(pygame.image.load("assets/img/bala.png"), (20, 20)),
@@ -269,7 +276,7 @@ class TelaJogo(Tela):
             "zumbi_ferido": pygame.transform.scale(pygame.image.load("assets/img/Zombie_1/Hurt_invertida.png"), (pygame.image.load("assets/img/Zombie_1/Hurt_invertida.png").get_width()*5, pygame.image.load("assets/img/Zombie_1/Hurt_invertida.png").get_height()*5)),
             "zombie_walk": pygame.transform.scale(pygame.image.load("assets/img/Zombie_1/Walk.png"), (pygame.image.load("assets/img/Zombie_1/Walk.png").get_width()*5, pygame.image.load("assets/img/Zombie_1/Walk.png").get_height()*5))
         }
-        self.personagem = Personagens(self.assets['parado'], 7)
+        self.personagem = Personagens(self.assets['parado'], 7,self.tela)
         self.moving_left = False
         self.moving_right = False
         self.moving_up = False
@@ -287,7 +294,7 @@ class TelaJogo(Tela):
         self.cronometro = Cronometro(1, self.assets["fonte"])
 
         self.ultima_geracao = pygame.time.get_ticks()
-        self.intervalo_geracao = 4000 # 3000 porque seriam 3000 milisegundos
+        self.intervalo_geracao = 4000 # 4000 porque seriam 3000 milisegundos
 
     def trata_eventos(self, eventos):
         agora = pygame.time.get_ticks()
@@ -346,14 +353,14 @@ class TelaJogo(Tela):
     def atualiza(self):
         self.cronometro.atualizar()
         if self.cronometro.tempo_acabou:
-            self.jogo.trocar_tela(TelaGameOver(self.jogo))
+            self.jogo.trocar_tela(TelaGameOver(self.jogo,self.tela))
 
         agora = pygame.time.get_ticks()
         if agora - self.ultima_geracao > self.intervalo_geracao:
             self.ultima_geracao = agora
-            novo_zumbi = Zumbies(self.assets["zombie_walk"], 10)
+            novo_zumbi = Zumbies(self.assets["zombie_walk"], 10, self.tela)
             self.zumbies.add(novo_zumbi)
-
+    
         colisao_tiro_zumbi = pygame.sprite.groupcollide(self.tiros, self.zumbies, True, False,pygame.sprite.collide_mask)
         for tiro, zumbis_atingidos in colisao_tiro_zumbi.items():
             for zumbi in zumbis_atingidos:
@@ -397,7 +404,7 @@ class TelaJogo(Tela):
         if self.moving_up or self.moving_down:
             if self.moving_up and self.personagem.rect.y > 35:
                 self.personagem.mover(0, -30)
-            if self.moving_down and self.personagem.rect.y + self.personagem.rect.height < altura_tela:
+            if self.moving_down and self.personagem.rect.y + self.personagem.rect.height < self.tela["altura"]:
                 self.personagem.mover(0, 30)
 
     def desenha(self, janela):
@@ -406,9 +413,9 @@ class TelaJogo(Tela):
         self.fps_monitor.calcula_fps()
         texto_fps = self.assets["fonte"].render(f'FPS: {self.fps_monitor.fps:.2f}', True, (255, 255, 255))
         texto_fps = pygame.transform.scale(texto_fps, (150, 30))
-        janela.blit(texto_fps, ((largura_tela - 150), (altura_tela - 30)))
+        janela.blit(texto_fps, ((self.tela["largura"]- 150), (self.tela["altura"] - 30)))
         
-        self.cronometro.desenha(janela, (largura_tela // 2) - 50, 10)  # Desenha o cronômetro no canto superior esquerdo
+        self.cronometro.desenha(janela, (self.tela["largura"] // 2) - 50, 10)  # Desenha o cronômetro no canto superior esquerdo
         
 
 
@@ -420,18 +427,20 @@ class TelaJogo(Tela):
         self.zumbies.draw(janela)
         self.tiros.draw(janela)
         self.impactos.draw(janela)
-        pygame.display.flip()
+        pygame.display.update()
 
 
 class Jogo:
     def __init__(self):
         pygame.init()
-        # info = pygame.display.Info()
-        # largura = info.current_w
-        # altura = info.current_h
-        self.janela = pygame.display.set_mode((largura_tela, altura_tela), pygame.FULLSCREEN)
+        info = pygame.display.Info()
+        self.tela = {
+            "largura": info.current_w,
+            "altura": info.current_h
+        }
+        self.janela = pygame.display.set_mode((self.tela["largura"], self.tela["altura"]), pygame.FULLSCREEN)
         pygame.display.set_caption("Zombie Attack")
-        self.tela_atual = TelaInicial(self)
+        self.tela_atual = TelaInicial(self,self.tela)
 
     def trocar_tela(self, nova_tela):
         self.tela_atual = nova_tela
