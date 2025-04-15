@@ -66,6 +66,7 @@ class TelaJogo(Tela):
             "zumbi_morto":pygame.image.load("assets/img/Zombie_1/Dead.png"),
             "zumbi_ferido":pygame.image.load("assets/img/Zombie_1/Hurt_invertida.png"),
             "zumbi_andar":pygame.image.load("assets/img/Zombie_1/Walk.png"),
+            "zumbi_ataque":pygame.image.load("assets/img/Zombie_1/Attack.png")
         }
         self.assets = {
             "img_fundo": pygame.transform.scale(pygame.image.load("assets/img/Fundo.png"), (self.tela["largura"], self.tela["altura"])),
@@ -78,9 +79,11 @@ class TelaJogo(Tela):
             "walk": pygame.transform.scale(self.sprites["personagem_andar"], (self.sprites["personagem_andar"].get_width() * 5, self.sprites["personagem_andar"].get_height() * 5)),
             "zumbi_morto": pygame.transform.scale(self.sprites["zumbi_morto"], (self.sprites["zumbi_morto"].get_width()*5, self.sprites["zumbi_morto"].get_height()*5)),
             "zumbi_ferido": pygame.transform.scale(self.sprites["zumbi_ferido"], (self.sprites["zumbi_ferido"].get_width()*5, self.sprites["zumbi_ferido"].get_height()*5)),
-            "zombie_walk": pygame.transform.scale(self.sprites["zumbi_andar"], (self.sprites["zumbi_andar"].get_width()*5, self.sprites["zumbi_andar"].get_height()*5))
+            "zombie_walk": pygame.transform.scale(self.sprites["zumbi_andar"], (self.sprites["zumbi_andar"].get_width()*5, self.sprites["zumbi_andar"].get_height()*5)),
+            "zombie_attack": pygame.transform.scale(self.sprites["zumbi_ataque"],(self.sprites["zumbi_ataque"].get_width()*5,self.sprites["zumbi_ataque"].get_height()*5))
         }
         self.personagem = Personagens(self.assets['parado'], 7,self.tela)
+        self.grupo_pesonagem = pygame.sprite.GroupSingle(self.personagem)
         self.moving_left = False
         self.moving_right = False
         self.moving_up = False
@@ -88,7 +91,7 @@ class TelaJogo(Tela):
         self.fps_monitor = FPS()
         self.cooldown = 250
         self.ultimo_update = pygame.time.get_ticks()
-
+        self.personagem_vida = 100
         pygame.mouse.set_visible(False)
         self.mira = pygame.transform.scale(self.assets["mira"], (27, 27))
 
@@ -105,7 +108,7 @@ class TelaJogo(Tela):
         for evento in eventos:
             if evento.type == pygame.MOUSEBUTTONDOWN and evento.button == 1:
                 destino_x, destino_y = pygame.mouse.get_pos()
-                if (destino_x >= self.personagem.rect.centerx) and destino_y >= 400:
+                if (destino_x > self.personagem.rect.centerx) and destino_y >= 400:
                     if agora - self.ultimo_update > self.cooldown:
                         # if not self.animacao_tiro:
                         self.personagem.trocar_animacao(self.assets['tiro'], 4)
@@ -164,7 +167,16 @@ class TelaJogo(Tela):
             self.ultima_geracao = agora
             novo_zumbi = Zumbies(self.assets["zombie_walk"], 10, self.tela)
             self.zumbies.add(novo_zumbi)
-    
+        # colisao_zumbi_personagem = pygame.sprite.groupcollide(self.grupo_pesonagem,self.zumbies,False,False,pygame.sprite.collide_mask)
+        # if colisao_zumbi_personagem:
+        #     for personagem, zumbie in colisao_zumbi_personagem.items():
+        #         for zumbi in zumbie:
+        #             # self.personagem_vida -= 10
+        #             zumbi.trocar_animacao(self.assets["zombie_attack"],5)
+        #             # if self.personagem_vida == 0:
+        #             #     pygame.quit()
+        # else:
+        #     pass
         colisao_tiro_zumbi = pygame.sprite.groupcollide(self.tiros, self.zumbies, True, False,pygame.sprite.collide_mask)
         for tiro, zumbis_atingidos in colisao_tiro_zumbi.items():
             for zumbi in zumbis_atingidos:
@@ -226,7 +238,7 @@ class TelaJogo(Tela):
         mouse_x, mouse_y = pygame.mouse.get_pos()
         mira_rect = self.mira.get_rect(center=(mouse_x, mouse_y))
         janela.blit(self.mira, mira_rect)
-
+        # pygame.draw.rect(janela,(255,0,0),self.personagem.rect)
         self.personagem.desenha(janela)
         self.zumbies.draw(janela)
         self.tiros.draw(janela)
