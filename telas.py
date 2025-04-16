@@ -118,7 +118,7 @@ class TelaJogo(Tela):
                         y = self.personagem.rect.centery
 
                         destino_x, destino_y = pygame.mouse.get_pos()
-                        novo_tiro = Tiro(x + 20, y + 130, destino_x, destino_y, self.assets['bala'])
+                        novo_tiro = Tiro(x +30 , y , destino_x, destino_y, self.assets['bala'])
                         self.tiros.add(novo_tiro)
 
                         self.animacao_repetir = False
@@ -171,10 +171,7 @@ class TelaJogo(Tela):
         # if colisao_zumbi_personagem:
         #     for personagem, zumbie in colisao_zumbi_personagem.items():
         #         for zumbi in zumbie:
-        #             # self.personagem_vida -= 10
-        #             zumbi.trocar_animacao(self.assets["zombie_attack"],5)
-        #             # if self.personagem_vida == 0:
-        #             #     pygame.quit()
+        #             zumbi.trocar_animacao(self.assets["zombie_attack"], 5, dano=True, novo_estado='Ataque')
         # else:
         #     pass
         colisao_tiro_zumbi = pygame.sprite.groupcollide(self.tiros, self.zumbies, True, False,pygame.sprite.collide_mask)
@@ -195,8 +192,8 @@ class TelaJogo(Tela):
                 if self.personagem.frame_atual == len(self.personagem.frames) - 1:  # Último quadro
                     if self.animacao_repetir:  # Se a tecla ainda estiver pressionada, reinicia
                         self.personagem.trocar_animacao(self.assets['tiro'], 4)  # Reinicia animação
-                        x = self.personagem.rect.centerx
-                        y = self.personagem.rect.centery
+                        x = self.personagem.rect.x
+                        y = self.personagem.rect.y
                         destino_x, destino_y = pygame.mouse.get_pos()
                         novo_tiro = Tiro(x+100,y+140, destino_x, destino_y, self.assets['bala'])
                         self.tiros.add(novo_tiro)
@@ -238,7 +235,7 @@ class TelaJogo(Tela):
         mouse_x, mouse_y = pygame.mouse.get_pos()
         mira_rect = self.mira.get_rect(center=(mouse_x, mouse_y))
         janela.blit(self.mira, mira_rect)
-        # pygame.draw.rect(janela,(255,0,0),self.personagem.rect)
+        pygame.draw.rect(janela,(255,0,0),self.personagem.rect)
         self.personagem.desenha(janela)
         self.zumbies.draw(janela)
         self.tiros.draw(janela)

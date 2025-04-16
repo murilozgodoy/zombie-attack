@@ -60,10 +60,31 @@ class Personagens(pygame.sprite.Sprite):
         self.tempo_ultimo_update = pygame.time.get_ticks()
         self.intervalo_animacao = 100
         self.tela = tela
-        largura = self.frames[0].get_width()
-        altura = self.frames[0].get_height()
-        self.rect = pygame.Rect(tela["largura"] - 1000, tela["altura"] - 700, largura, altura)
-        self.vidas = 3
+        largura_frame = 112 * 5
+        altura_frame = 128 * 5
+
+        # Frame da sprite (imagem visual do personagem)
+        self.image_rect = pygame.Rect(
+            (tela["largura"] // 2) - largura_frame // 2,
+            tela["altura"] - altura_frame - 50,
+            largura_frame,
+            altura_frame
+        )
+
+        # Hitbox mais precisa (centralizada na parte do corpo)
+        hitbox_largura = 100
+        hitbox_altura = 350
+
+        # Alinha o centro da hitbox com a parte inferior do personagem (os pés)
+        self.rect = pygame.Rect(
+            (self.image_rect.centerx - hitbox_largura // 2)+30,
+            self.image_rect.bottom - hitbox_altura,
+            hitbox_largura,
+            hitbox_altura
+        )
+
+    
+        self.vidas = 100
 
     def carregar_frames(self, image, frames):
         image = image.convert_alpha()
@@ -90,8 +111,10 @@ class Personagens(pygame.sprite.Sprite):
         self.rect.x -= velocidadex * delta_time
         self.rect.y += velocidadey * delta_time
 
+        self.image_rect.x -= velocidadex * delta_time
+        self.image_rect.y += velocidadey * delta_time
     def desenha(self, janela):
-        janela.blit(self.image, self.rect)
+        janela.blit(self.image, self.image_rect)
 
 class Zumbies(pygame.sprite.Sprite):
     def __init__(self, image, frames, tela):
