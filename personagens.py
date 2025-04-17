@@ -24,9 +24,9 @@ class Tiro(pygame.sprite.Sprite):
         if (self.rect.right < 0 or self.rect.left > 1920 or
             self.rect.bottom < 0 or self.rect.top > 1080):
             self.kill()
-
+            
 class Impacto(pygame.sprite.Sprite):
-    def __init__(self, center, spritesheet, frames):
+    def __init__(self, center, spritesheet, frames,entidade):
         super().__init__()
         self.frames = self.carregar_frames(spritesheet, frames)
         self.frame_atual = 0
@@ -34,6 +34,8 @@ class Impacto(pygame.sprite.Sprite):
         self.rect = self.image.get_rect(center=center)
         self.tempo_anterior = pygame.time.get_ticks()
         self.intervalo = 200
+        self.entidade = entidade
+        
 
     def carregar_frames(self, spritesheet, frames):
         image = spritesheet.convert_alpha()
@@ -50,7 +52,8 @@ class Impacto(pygame.sprite.Sprite):
             if self.frame_atual < len(self.frames):
                 self.image = self.frames[self.frame_atual]
             else:
-                self.kill()
+                if self.entidade != "Personagem":
+                    self.kill()
 
 class Personagens(pygame.sprite.Sprite):
     def __init__(self, image, frames, tela):
@@ -86,6 +89,7 @@ class Personagens(pygame.sprite.Sprite):
     
         self.vidas = 100
 
+
     def carregar_frames(self, image, frames):
         image = image.convert_alpha()
         altura = image.get_height()
@@ -104,6 +108,9 @@ class Personagens(pygame.sprite.Sprite):
             self.tempo_ultimo_update = agora
             self.frame_atual = (self.frame_atual + 1) % len(self.frames)
             self.image = self.frames[self.frame_atual]
+            # if self.frame_atual >= len(self.frames):
+                # if 
+                # self.trocar_animacao(self.walk,5)
 
     def mover(self, velocidadex, velocidadey):
         agora = pygame.time.get_ticks()
@@ -124,9 +131,28 @@ class Zumbies(pygame.sprite.Sprite):
         self.tempo_ultimo_update = pygame.time.get_ticks()
         self.walk = image
         self.intervalo_animacao = 100
-        largura = self.frames[0].get_width()
-        altura = self.frames[0].get_height()
-        self.rect = pygame.Rect(tela["largura"], tela["altura"] - 700, largura, altura)
+        largura_frame = 112 * 5
+        altura_frame = 128 * 5
+
+        # Frame da sprite (imagem visual do personagem)
+        self.image_rect = pygame.Rect(tela["largura"] ,
+            tela["altura"] - 400,
+            largura_frame,
+            altura_frame
+        )
+
+        # Hitbox mais precisa (centralizada na parte do corpo)
+        hitbox_largura = 150
+        hitbox_altura = 350
+
+        # Alinha o centro da hitbox com a parte inferior do personagem (os pés)
+        self.rect = pygame.Rect(
+            (self.image_rect.centerx - hitbox_largura // 2),
+            tela["altura"] - 400,
+            hitbox_largura,
+            hitbox_altura
+        )
+
         self.vidas = 2
         self.velocidade = 10
         self.estado = 'andando'
@@ -149,6 +175,7 @@ class Zumbies(pygame.sprite.Sprite):
 
     def update(self):
         agora = pygame.time.get_ticks()
+        delta_time = (agora - self.tempo_ultimo_update) / 1000
         if agora - self.tempo_ultimo_update > self.intervalo_animacao:
             self.tempo_ultimo_update = agora
             self.frame_atual += 1
@@ -157,15 +184,22 @@ class Zumbies(pygame.sprite.Sprite):
                     self.trocar_animacao(self.walk, 10)
                     self.estado = 'andando'
                     self.animacao_dano = False
+                elif self.estado == "Ataque":
+                    self.trocar_animacao(self.walk,5)
+                    self.rect.x -= 20 * delta_time
+                    self.image_rect.midbottom = self.rect.midbottom
+                    self.estado = "andando"
                 else:
                     self.frame_atual = 0
             self.image = self.frames[self.frame_atual]
-
+            
         if self.estado == 'andando':
-            delta_time = (agora - self.tempo_ultimo_update) / 1000
             self.rect.x -= self.velocidade * delta_time
-            if self.rect.x < 0:
+            self.image_rect.midbottom = self.rect.midbottom  # mantém sprite sempre alinhado com a hitbox
+            if self.rect.x < -200:
                 self.kill()
+            
 
     def desenha(self, janela):
-        janela.blit(self.image, self.rect)
+        janela.blit(self.image, self.image_rect)
+        # pygame.draw.rect(janela, (0, 255, 0), self.rect)
