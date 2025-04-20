@@ -261,9 +261,9 @@ class TelaJogo(Tela):
 
         # Verificar movimento horizontal
         if self.moving_left or self.moving_right:
-            if self.moving_left:
+            if self.moving_left and self.personagem.rect.x - self.personagem.rect.width >= 0:
                 self.personagem.mover(30, 0)
-            if self.moving_right:
+            if self.moving_right and self.personagem.rect.x + self.personagem.rect.width < self.tela["largura"]:
                 self.personagem.mover(-30, 0)
 
         # Verificar movimento vertical
@@ -295,6 +295,7 @@ class TelaJogo(Tela):
         for zumbi in self.zumbies:
             # pygame.draw.rect(janela,(0,255,0),zumbi.rect)
             zumbi.desenha(janela)
+            
         if self.personagem in self.grupo_pesonagem:
             self.personagem.desenha(janela)
         # self.zumbies.draw(janela)
