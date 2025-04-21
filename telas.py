@@ -18,7 +18,9 @@ class TelaInicial(Tela):
         imagem = pygame.image.load("assets/img/Inicial.png")
         self.image = pygame.transform.scale(imagem, (tela["largura"], tela["altura"]))
         self.jogar = pygame.image.load("assets/img/Botao_jogar.png")
-        self.botao_jogar_rect = pygame.Rect((tela["largura"] - 475) // 2, (tela["altura"] - 135) // 2, 475, 135)
+        self.botao_jogar_rect = pygame.Rect((tela["largura"] - 640) // 2, (tela["altura"] - 175) // 2, 570, 160)
+        self.botao_instrucoes_rect = pygame.Rect((tela["largura"] - 640) // 2, (tela["altura"] + 235) // 2, 570, 160)
+        
 
     def trata_eventos(self, eventos):
         for evento in eventos:
@@ -26,10 +28,16 @@ class TelaInicial(Tela):
                 if evento.type == pygame.MOUSEBUTTONDOWN and evento.button == 1:
                     from telas import TelaJogo
                     self.jogo.trocar_tela(TelaJogo(self.jogo, self.tela))
+            if self.botao_instrucoes_rect.collidepoint(pygame.mouse.get_pos()):
+                if evento.type == pygame.MOUSEBUTTONDOWN and evento.button == 1:
+                    from telas import TelaInstrucoes
+                    self.jogo.trocar_tela(TelaInstrucoes(self.jogo, self.tela))
 
     def desenha(self, janela):
         janela.fill((0, 0, 0))
         janela.blit(self.image, (0, 0))
+        pygame.draw.rect(janela, (255, 255, 255), self.botao_jogar_rect)
+        pygame.draw.rect(janela, (255, 0, 255), self.botao_instrucoes_rect)
         pygame.display.flip()
 
 class TelaGameOver(Tela):
@@ -49,6 +57,63 @@ class TelaGameOver(Tela):
     def desenha(self, janela):
         janela.fill((0, 0, 0))
         janela.blit(self.image, (0, 0))
+        pygame.display.flip()
+
+class TelaInstrucoes(Tela):
+    def __init__(self, jogo, tela):
+        self.jogo = jogo
+        self.tela = tela
+        self.image = pygame.transform.scale(pygame.image.load("assets/img/fundo.png"), (self.tela["largura"], self.tela['altura']))
+        self.instrucoes = pygame.transform.scale(pygame.image.load("assets/img/aaa.png"), (self.tela["largura"] // 2, self.tela['altura'] // 2))
+
+    def trata_eventos(self, eventos):
+        for evento in eventos:
+            if evento.type == pygame.KEYDOWN and evento.key == pygame.K_i:
+                from telas import TelaInicial
+                self.jogo.trocar_tela(TelaInicial(self.jogo, self.tela))
+            if evento.type == pygame.KEYDOWN and evento.key == pygame.K_s: #coloquei qualquer tecla, depois mudamos para a tecla que quisermos#
+                from telas import TelaJogo
+                self.jogo.trocar_tela(TelaJogo(self.jogo, self.tela))
+
+
+    def desenha(self, janela):
+        janela.fill((0, 0, 0))
+        janela.blit(self.image, (0, 0))
+
+        fonte_titulo = pygame.font.SysFont('arialblack', 36)
+        fonte_texto = pygame.font.SysFont('lucidaconsole', 22)
+
+  
+        cor_caixa = (30, 30, 30)
+        cor_texto = (220, 220, 220)
+        cor_titulo = (222, 177, 61)
+
+        # Instruções
+        instrucoes = [
+            "Mire com o mouse nos zumbis e atire pressionando o botão esquerdo.",
+            "Ande para os lados pressionando as teclas 'A' (esquerda) e 'D' (direita).",
+            "Não deixe os zumbis invadirem sua base de proteção.",
+            "Evite que os carniçais de combate se aproximem de você, já que conseguem te atacar.",
+            "Sobreviva até o tempo acabar para vencer!"
+        ]
+
+        largura_caixa = 1120
+        altura_caixa = 400
+        x_caixa = (self.tela["largura"] - largura_caixa) // 2
+        y_caixa = (self.tela["altura"] - altura_caixa) // 2
+        pygame.draw.rect(janela, cor_caixa, (x_caixa, y_caixa, largura_caixa, altura_caixa), border_radius=10)
+
+   
+        titulo = fonte_titulo.render("COMO JOGAR", True, cor_titulo)
+        janela.blit(titulo, (x_caixa + (largura_caixa - titulo.get_width()) // 2, y_caixa + 25))
+
+ 
+        y_texto = y_caixa + 100
+        for linha in instrucoes:
+            texto = fonte_texto.render(linha, True, cor_texto)
+            janela.blit(texto, (x_caixa + (largura_caixa - texto.get_width()) // 2, y_texto))
+            y_texto += 40  # Ajustado para caber no total de linhas
+
         pygame.display.flip()
 
 
@@ -106,7 +171,7 @@ class TelaJogo(Tela):
         # self.arma_vazia = pygame.mixer.Sound("assets/snd/sem_municao.wav")
         # self.arma_vazia.set_volume(1.0)
         self.tiro_sound = pygame.mixer.Sound("assets\snd\som_tiro.wav")
-        self.tiro_sound.set_volume(0.2)
+        self.tiro_sound.set_volume(0.07)
         self.som_ambiente = pygame.mixer.Sound("assets\snd\som_ambiente.wav")
         self.som_ambiente.set_volume(0.1)
         self.som_ambiente.play(-1)
