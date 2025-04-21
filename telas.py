@@ -72,6 +72,9 @@ class TelaVitoria(Tela):
         self.municoes = self.fonte.render(f'Munições: {self.usuario["municoes_totais"] + self.usuario["municoes"]}', True, (255, 255, 255))
         self.municoes = pygame.transform.scale(self.municoes, (500, 100))
 
+        self.acertos = self.fonte.render(f'% de Acertos: {self.usuario["acertos"]:.2f}', True, (255, 255, 255))
+        self.acertos = pygame.transform.scale(self.acertos, (500, 100))
+
     def trata_eventos(self, eventos):
         for evento in eventos:
             if evento.type == pygame.KEYDOWN and evento.key == pygame.K_r:
@@ -85,11 +88,13 @@ class TelaVitoria(Tela):
         janela.blit(self.vidas, ((self.tela["largura"] - 750), (self.tela["altura"] - 900)))
         janela.blit(self.zumbies_mortos, ((self.tela["largura"] - 750), (self.tela["altura"] - 700)))
         janela.blit(self.municoes, ((self.tela["largura"] - 750), (self.tela["altura"] - 500)))
+        janela.blit(self.acertos, ((self.tela["largura"] - 750), (self.tela["altura"] - 300)))
         pygame.display.flip()
         
         
 class TelaJogo(Tela):
     def __init__(self, jogo,tela):
+        pygame.mixer.init()
         self.jogo = jogo
         # self.zumbies_mortos = 0
         self.tela = tela
@@ -161,14 +166,15 @@ class TelaJogo(Tela):
         self.estado = "vivo"
         self.tempo_morte = None  # Marca quando morreu
         self.personagem_recarregando = False
-
+        self.zumbies_atingidos = 0
 
 
         self.usuario = {
             "vida": self.personagem.vidas,
             "municoes": self.personagem.municoes,
             "municoes_totais": self.personagem.municoes_totais,
-            "zumbies_mortos": self.personagem.zumbies_mortos
+            "zumbies_mortos": self.personagem.zumbies_mortos,
+            "acertos": (150-(self.personagem.municoes_totais + self.personagem.municoes))/self.zumbies_atingidos if not self.zumbies_atingidos == 0 else 0,
 
         }
     def trata_eventos(self, eventos):
@@ -204,12 +210,13 @@ class TelaJogo(Tela):
                             self.personagem.trocar_animacao(self.assets["parado"], 7)
             if evento.type == pygame.KEYDOWN:
                 # Teste para tela de vitoria 
-                # if evento.key == pygame.K_t:
-                #     self.usuario["vida"] = self.personagem.vidas
-                #     self.usuario["municoes"] = self.personagem.municoes
-                #     self.usuario["municoes_totais"] = self.personagem.municoes_totais
-                #     self.usuario["zumbies_mortos"] = self.personagem.zumbies_mortos
-                #     self.jogo.trocar_tela(TelaVitoria(self.jogo,self.tela,self.usuario))
+                if evento.key == pygame.K_t:
+                    self.usuario["vida"] = self.personagem.vidas
+                    self.usuario["municoes"] = self.personagem.municoes
+                    self.usuario["municoes_totais"] = self.personagem.municoes_totais
+                    self.usuario["zumbies_mortos"] = self.personagem.zumbies_mortos
+                    self.usuario["acertos"] = ((150-(self.personagem.municoes_totais + self.personagem.municoes))/self.zumbies_atingidos) *100 if not self.zumbies_atingidos == 0 else 0
+                    self.jogo.trocar_tela(TelaVitoria(self.jogo,self.tela,self.usuario))
                 if evento.key == pygame.K_r:
                     if self.personagem.municoes <= 0 and self.personagem.municoes_totais >= 30:
                         self.personagem.municoes = 30
@@ -308,6 +315,7 @@ class TelaJogo(Tela):
         for tiro, zumbis_atingidos in colisao_tiro_zumbi.items():
             for zumbi in zumbis_atingidos:
                 zumbi.vidas -= 1
+                self.zumbies_atingidos += 1
                 if zumbi.vidas <= 0:
                     impacto = Impacto(zumbi.image_rect.center,self.assets["zumbi_morto"],5,"zumbi")
                     self.impactos.add(impacto) 
@@ -377,12 +385,12 @@ class TelaJogo(Tela):
         mouse_x, mouse_y = pygame.mouse.get_pos()
         mira_rect = self.mira.get_rect(center=(mouse_x, mouse_y))
         janela.blit(self.mira, mira_rect)
-        # for zumbi in self.zumbies:
-        #     pygame.draw.rect(janela,(0,255,0),zumbi.rect)
-        #     zumbi.desenha(janela)
-        for corredores in self.corredores:
-            pygame.draw.rect(janela,(0,255,0),corredores.rect)
-            corredores.desenha(janela)
+        for zumbi in self.zumbies:
+            pygame.draw.rect(janela,(0,255,0),zumbi.rect)
+            zumbi.desenha(janela)
+        # for corredores in self.corredores:
+        #     pygame.draw.rect(janela,(0,255,0),corredores.rect)
+        #     corredores.desenha(janela)
             
         if self.personagem in self.grupo_pesonagem:
             self.personagem.desenha(janela)
