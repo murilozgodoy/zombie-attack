@@ -64,7 +64,6 @@ class TelaInstrucoes(Tela):
         self.jogo = jogo
         self.tela = tela
         self.image = pygame.transform.scale(pygame.image.load("assets/img/fundo.png"), (self.tela["largura"], self.tela['altura']))
-        self.instrucoes = pygame.transform.scale(pygame.image.load("assets/img/aaa.png"), (self.tela["largura"] // 2, self.tela['altura'] // 2))
 
     def trata_eventos(self, eventos):
         for evento in eventos:
@@ -80,10 +79,11 @@ class TelaInstrucoes(Tela):
         janela.fill((0, 0, 0))
         janela.blit(self.image, (0, 0))
 
+   
         fonte_titulo = pygame.font.SysFont('arialblack', 36)
         fonte_texto = pygame.font.SysFont('lucidaconsole', 22)
+        fonte_acao = pygame.font.SysFont('lucidaconsole', 22) 
 
-  
         cor_caixa = (30, 30, 30)
         cor_texto = (220, 220, 220)
         cor_titulo = (222, 177, 61)
@@ -97,22 +97,27 @@ class TelaInstrucoes(Tela):
             "Sobreviva até o tempo acabar para vencer!"
         ]
 
+        # Caixa de texto
         largura_caixa = 1120
-        altura_caixa = 400
+        altura_caixa = 450  # aumentado um pouco para a nova linha
         x_caixa = (self.tela["largura"] - largura_caixa) // 2
         y_caixa = (self.tela["altura"] - altura_caixa) // 2
         pygame.draw.rect(janela, cor_caixa, (x_caixa, y_caixa, largura_caixa, altura_caixa), border_radius=10)
 
-   
+        # Título
         titulo = fonte_titulo.render("COMO JOGAR", True, cor_titulo)
         janela.blit(titulo, (x_caixa + (largura_caixa - titulo.get_width()) // 2, y_caixa + 25))
 
- 
+        # Instruções
         y_texto = y_caixa + 100
         for linha in instrucoes:
             texto = fonte_texto.render(linha, True, cor_texto)
             janela.blit(texto, (x_caixa + (largura_caixa - texto.get_width()) // 2, y_texto))
-            y_texto += 40  # Ajustado para caber no total de linhas
+            y_texto += 40
+
+        y_texto += 45
+        texto_acao = fonte_acao.render("PRESSIONE 'S' PARA TENTAR SOBREVIVER AO APOCALIPSE OU 'I' PARA VOLTAR AO INÍCIO!", True, cor_titulo)
+        janela.blit(texto_acao, (x_caixa + (largura_caixa - texto_acao.get_width()) // 2, y_texto))
 
         pygame.display.flip()
 
