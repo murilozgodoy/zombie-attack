@@ -276,7 +276,7 @@ class TelaJogo(Tela):
                 self.usuario["municoes"] = self.personagem.municoes
                 self.usuario["municoes_totais"] = self.personagem.municoes_totais
                 self.usuario["zumbies_mortos"] = self.personagem.zumbies_mortos
-
+                self.usuario["acertos"] = ((150-(self.personagem.municoes_totais + self.personagem.municoes))/self.zumbies_atingidos) *100 if not self.zumbies_atingidos == 0 else 0
                 self.jogo.trocar_tela(TelaVitoria(self.jogo,self.tela,self.usuario))
             else:
                 self.jogo.trocar_tela(TelaGameOver(self.jogo,self.tela))
