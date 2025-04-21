@@ -80,10 +80,19 @@ class TelaJogo(Tela):
         self.zumbies = pygame.sprite.Group()
         self.tiros = pygame.sprite.Group()
         self.impactos = pygame.sprite.Group() 
+        self.recarregar_sound = pygame.mixer.Sound("assets/snd/recarregar.wav")
+        # self.arma_vazia = pygame.mixer.Sound("assets/snd/sem_municao.wav")
+        # self.arma_vazia.set_volume(1.0)
+        self.tiro_sound = pygame.mixer.Sound("assets\snd\som_tiro.wav")
+        self.tiro_sound.set_volume(0.2)
+        self.som_ambiente = pygame.mixer.Sound("assets\snd\som_ambiente.wav")
+        self.som_ambiente.set_volume(0.1)
+        self.som_ambiente.play(-1)
         self.sprites = {
-            "personagem_atirando":pygame.image.load("assets/img/Shot_1.png"),
+            "personagem_atirando":pygame.image.load("assets/img/Soldier_1/Shot_2.png"),
             "personagem_parado":pygame.image.load("assets/img/Idle.png"),
             "personagem_andar_para_tras":pygame.image.load("assets/img/Walk_inverted.png"),
+            "personagem_recarregar":pygame.image.load("assets/img/Soldier_1/Recharge.png"),
             "personagem_andar":pygame.image.load("assets/img/Walk.png"),
             "personagem_morre":pygame.image.load("assets/img/Soldier_1/Dead.png"),
             "zumbi_morto":pygame.image.load("assets/img/Zombie_1/Dead.png"),
@@ -104,7 +113,8 @@ class TelaJogo(Tela):
             "zumbi_ferido": pygame.transform.scale(self.sprites["zumbi_ferido"], (self.sprites["zumbi_ferido"].get_width()*5, self.sprites["zumbi_ferido"].get_height()*5)),
             "zombie_walk": pygame.transform.scale(self.sprites["zumbi_andar"], (self.sprites["zumbi_andar"].get_width()*5, self.sprites["zumbi_andar"].get_height()*5)),
             "zombie_attack": pygame.transform.scale(self.sprites["zumbi_ataque"],(self.sprites["zumbi_ataque"].get_width()*5,self.sprites["zumbi_ataque"].get_height()*5)),
-            "personagem_dead": pygame.transform.scale(self.sprites["personagem_morre"],(self.sprites["personagem_morre"].get_width()*5,self.sprites["personagem_morre"].get_height()*5))
+            "personagem_dead": pygame.transform.scale(self.sprites["personagem_morre"],(self.sprites["personagem_morre"].get_width()*5,self.sprites["personagem_morre"].get_height()*5)),
+            "pesonagem_recarregar": pygame.transform.scale(self.sprites["personagem_recarregar"],(self.sprites["personagem_recarregar"].get_width()*5,self.sprites["personagem_recarregar"].get_height()*5)),
         }
         self.personagem = Personagens(self.assets['parado'], 7,self.tela)
         self.grupo_pesonagem = pygame.sprite.GroupSingle(self.personagem)
@@ -130,32 +140,57 @@ class TelaJogo(Tela):
         self.cooldown_gameover = 5000
         self.estado = "vivo"
         self.tempo_morte = None  # Marca quando morreu
-
+        self.personagem_recarregando = False
     def trata_eventos(self, eventos):
         agora = pygame.time.get_ticks()
         if self.estado == "morto":
             return
         for evento in eventos:
             if evento.type == pygame.MOUSEBUTTONDOWN and evento.button == 1:
-                destino_x, destino_y = pygame.mouse.get_pos()
-                if (destino_x > self.personagem.rect.centerx) and destino_y >= 400:
-                    if agora - self.ultimo_update > self.cooldown:
-                        # if not self.animacao_tiro:
-                        self.personagem.trocar_animacao(self.assets['tiro'], 4)
-                        self.animacao_tiro = True
+                if self.personagem.municoes > 0:
+                    destino_x, destino_y = pygame.mouse.get_pos()
+                    if (destino_x > self.personagem.rect.centerx) and destino_y >= 400:
+                        if agora - self.ultimo_update > self.cooldown:
+                            # if not self.animacao_tiro:
+                            self.personagem.trocar_animacao(self.assets['tiro'], 4)
+                            self.animacao_tiro = True
 
-                        x = self.personagem.rect.centerx
-                        y = self.personagem.rect.centery
+                            x = self.personagem.rect.centerx
+                            y = self.personagem.rect.centery
 
-                        destino_x, destino_y = pygame.mouse.get_pos()
-                        novo_tiro = Tiro(x +30 , y , destino_x, destino_y, self.assets['bala'])
-                        self.tiros.add(novo_tiro)
+                            destino_x, destino_y = pygame.mouse.get_pos()
+                            novo_tiro = Tiro(x +50 , y - 40 , destino_x, destino_y, self.assets['bala'])
+                            self.tiros.add(novo_tiro)
 
-                        self.animacao_repetir = False
-                        self.ultimo_update = agora
-                    else:
-                        self.personagem.trocar_animacao(self.assets["parado"], 7)
+                            self.animacao_repetir = False
+                            self.ultimo_update = agora
+                            self.tiro_sound.play()
+                            self.personagem.municoes -= 1
+                        else:
+                            # if self.personagem.municoes <= 0:
+                            #     self.arma_vazia.play()
+                            self.personagem.trocar_animacao(self.assets["parado"], 7)
             if evento.type == pygame.KEYDOWN:
+                if evento.key == pygame.K_r:
+                    if self.personagem.municoes <= 0 and self.personagem.municoes_totais >= 30:
+                        self.personagem.municoes = 30
+                        self.personagem.municoes_totais -= 30
+                        self.personagem.trocar_animacao(self.assets["pesonagem_recarregar"], 13)
+                        self.recarregar_sound.play()
+                        self.personagem_recarregando = True
+                    if 0 < self.personagem.municoes < 30:
+                        diferenca = 30 - self.personagem.municoes
+                        self.personagem.municoes = 30
+                        self.personagem.municoes_totais -= diferenca
+                        self.personagem.trocar_animacao(self.assets["pesonagem_recarregar"], 13)
+                        self.recarregar_sound.play()
+                        self.personagem_recarregando = True
+                    if self.personagem.municoes_totais < 30:
+                        self.personagem.municoes = self.personagem.municoes_totais
+                        self.personagem.municoes_totais = 0
+                        self.personagem.trocar_animacao(self.assets["pesonagem_recarregar"], 13)
+                        self.recarregar_sound.play()
+                        self.personagem_recarregando = True
                 if evento.key == pygame.K_a:  
                     self.moving_left = True
                     self.moving_right = False
@@ -190,6 +225,7 @@ class TelaJogo(Tela):
     def atualiza(self):
         self.cronometro.atualizar()
         if self.cronometro.tempo_acabou:
+            self.som_ambiente.stop()
             if self.estado == "vivo":
                 self.jogo.trocar_tela(TelaVitoria(self.jogo,self.tela))
             else:
@@ -200,33 +236,27 @@ class TelaJogo(Tela):
             self.ultima_geracao = agora
             novo_zumbi = Zumbies(self.assets["zombie_walk"], 10, self.tela)
             self.zumbies.add(novo_zumbi)
-        colisao_zumbi_personagem = pygame.sprite.groupcollide(self.grupo_pesonagem,self.zumbies,False,False)
-        if colisao_zumbi_personagem:
-            for personagem, zumbie in colisao_zumbi_personagem.items():
-                for zumbi in zumbie:
-                    if zumbi.estado != 'Ataque':  
-                        zumbi.trocar_animacao(self.assets["zombie_attack"], 5, dano=False, novo_estado='Ataque')
-                        self.personagem.vidas -= 10
-                        if self.personagem.vidas <= 0 and self.estado != "morto":
-                            self.personagem.vidas = 0
-                            morte = Impacto(self.personagem.image_rect.center, self.assets["personagem_dead"], 4, "Personagem")
-                            self.impactos.add(morte)
-                            self.grupo_pesonagem.remove(self.personagem)
-                            self.estado = "morto"
-                            self.tempo_morte = pygame.time.get_ticks()  # Marca o momento da morte
+
     
-                            
-            
-        else:
-            pass
-        
-        
+        colisao_zumbi_personagem = pygame.sprite.groupcollide(self.grupo_pesonagem,self.zumbies,False,False)
+        for personagem, zumbie in colisao_zumbi_personagem.items():
+            for zumbi in zumbie:
+                if zumbi.estado != 'Ataque':  
+                    zumbi.trocar_animacao(self.assets["zombie_attack"], 5, dano=False, novo_estado='Ataque')
+                    self.personagem.vidas -= 10
+                    if self.personagem.vidas <= 0 and self.estado != "morto":
+                        self.personagem.vidas = 0
+                        morte = Impacto(self.personagem.image_rect.center, self.assets["personagem_dead"], 4, "Personagem")
+                        self.impactos.add(morte)
+                        self.grupo_pesonagem.remove(self.personagem)
+                        self.estado = "morto"
+                        self.tempo_morte = pygame.time.get_ticks()  # Marca o momento da morte
+    
         if self.estado == "morto" and self.tempo_morte is not None:
             agora = pygame.time.get_ticks()
             if agora - self.tempo_morte > self.cooldown_gameover:
                 self.jogo.trocar_tela(TelaGameOver(self.jogo, self.tela))
-                
-                
+ 
         colisao_tiro_zumbi = pygame.sprite.groupcollide(self.tiros, self.zumbies, True, False)
         for tiro, zumbis_atingidos in colisao_tiro_zumbi.items():
             for zumbi in zumbis_atingidos:
@@ -248,13 +278,17 @@ class TelaJogo(Tela):
                         x = self.personagem.rect.x
                         y = self.personagem.rect.y
                         destino_x, destino_y = pygame.mouse.get_pos()
-                        novo_tiro = Tiro(x+100,y+140, destino_x, destino_y, self.assets['bala'])
+                        novo_tiro = Tiro(x +50 , y - 40 , destino_x, destino_y, self.assets['bala'])
                         self.tiros.add(novo_tiro)
                     else:
                         self.animacao_tiro = False  # Conclui a animação de tiro
                         self.personagem.trocar_animacao(self.assets['parado'], 7)  # Retorna à animação parado
 
         self.personagem.update()
+        if self.personagem_recarregando:
+            if self.personagem.frame_atual == len(self.personagem.frames) - 1:
+                self.personagem_recarregando = False
+                self.personagem.trocar_animacao(self.assets["parado"], 7)
         self.zumbies.update()
         self.tiros.update()
         self.impactos.update()
@@ -282,12 +316,14 @@ class TelaJogo(Tela):
         janela.blit(texto_fps, ((self.tela["largura"]- 150), (self.tela["altura"] - 30)))
         
         
-        vida = self.assets["fonte"].render(f'  {self.personagem.vidas}', True, (255, 0,0))
+        vida = self.assets["fonte"].render(f'   {self.personagem.vidas}', True, (255, 0,0))
         vida = pygame.transform.scale(vida, (150, 30))
         janela.blit(vida, ((self.tela["largura"]- 150), 30))
         self.cronometro.desenha(janela, (self.tela["largura"] // 2) - 50, 10)  # Desenha o cronômetro no canto superior esquerdo
         
-
+        municao = self.assets["fonte"].render(f'  {self.personagem.municoes}/{self.personagem.municoes_totais}', True, (255,255,255))
+        municao = pygame.transform.scale(municao, (150, 30))
+        janela.blit(municao, ((self.tela["largura"]- 150), 80))
 
         mouse_x, mouse_y = pygame.mouse.get_pos()
         mira_rect = self.mira.get_rect(center=(mouse_x, mouse_y))
