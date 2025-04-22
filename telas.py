@@ -1,5 +1,7 @@
 import pygame,pygame.freetype
-from personagens import Personagens, Zumbies, Tiro, Impacto,Zumbies_Corredores
+from personagens import Tiro, Impacto
+from Personagens.Zumbies import Zumbies,Zumbies_Corredores
+from Personagens.Personagem import Personagens
 from Aerea import AmeacaAerea
 from explosao import ExplosaoAerea
 from ranking import add_score, load_ranking
