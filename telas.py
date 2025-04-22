@@ -202,7 +202,8 @@ class TelaVitoria(Tela):
 
         # --- registra no ranking e obtém lista atualizada ---
         # use self.jogo.player_name como nome do jogador
-        self.ranking = add_score(self.jogo.player_name, usuario["zumbies_mortos"])
+        pontos = (usuario["zumbies_mortos"] * 2) + usuario["vida"] + ( (usuario["acertos"]//100) * 200)
+        self.ranking = add_score(self.jogo.player_name, pontos)
 
         # pré-render de estatísticas
         self.zumbies_mortos = self.fonte.render(
@@ -236,16 +237,16 @@ class TelaVitoria(Tela):
         janela.blit(self.municoes, ((self.tela["largura"] - 750), (self.tela["altura"] - 500)))
         janela.blit(self.acertos, ((self.tela["largura"] - 750), (self.tela["altura"] - 300)))
         # Exibe o ranking (top 5)
-        emoji_font = pygame.freetype.Font("C:/Windows/Fonts/seguiemj.ttf", 32)
+        # emoji_font = pygame.freetype.Font("C:/Windows/Fonts/seguiemj.ttf", 32)
         x_rank, y_rank = 100, 300
-        emoji_font.render_to(janela, (100, 296), "🏆", fgcolor=(222,177,61))
-        titulo = self.fonte.render("  Top 5 Jogadores", True, (222,177,61))
+        # emoji_font.render_to(janela, (100, 296), "🏆", fgcolor=(222,177,61))
+        titulo = self.fonte.render(" Top 5 Jogadores", True, (222,177,61))
         janela.blit(titulo, (x_rank, y_rank))
         y_rank += 40
 
         for pos, entry in enumerate(self.ranking[:5], start=1):
             txt = self.fonte.render(
-                f'{pos}. {entry["name"]}: {entry["score"]}',
+                f'{pos}. {entry["name"]}: {entry["score"]:.0f}',
                 True, (255,255,255)
             )
             janela.blit(txt, (x_rank, y_rank))
@@ -270,9 +271,9 @@ class TelaJogo(Tela):
         self.recarregar_sound = pygame.mixer.Sound("assets/snd/recarregar.wav")
         # self.arma_vazia = pygame.mixer.Sound("assets/snd/sem_municao.wav")
         # self.arma_vazia.set_volume(1.0)
-        self.tiro_sound = pygame.mixer.Sound("assets\snd\som_tiro.wav")
+        self.tiro_sound = pygame.mixer.Sound("assets/snd/som_tiro.wav")
         self.tiro_sound.set_volume(0.07)
-        self.som_ambiente = pygame.mixer.Sound("assets\snd\som_ambiente.wav")
+        self.som_ambiente = pygame.mixer.Sound("assets/snd/som_ambiente.wav")
         self.som_ambiente.set_volume(0.1)
         self.som_ambiente.play(-1)
         self.sprites = {
@@ -343,7 +344,7 @@ class TelaJogo(Tela):
             "municoes": self.personagem.municoes,
             "municoes_totais": self.personagem.municoes_totais,
             "zumbies_mortos": self.personagem.zumbies_mortos,
-            "acertos": (150-(self.personagem.municoes_totais + self.personagem.municoes))/self.zumbies_atingidos if not self.zumbies_atingidos == 0 else 0,
+            "acertos": 0,
 
         }
     def trata_eventos(self, eventos):
@@ -378,14 +379,6 @@ class TelaJogo(Tela):
                             #     self.arma_vazia.play()
                             self.personagem.trocar_animacao(self.assets["parado"], 7)
             if evento.type == pygame.KEYDOWN:
-                # Teste para tela de vitoria 
-                if evento.key == pygame.K_t:
-                    self.usuario["vida"] = self.personagem.vidas
-                    self.usuario["municoes"] = self.personagem.municoes
-                    self.usuario["municoes_totais"] = self.personagem.municoes_totais
-                    self.usuario["zumbies_mortos"] = self.personagem.zumbies_mortos
-                    self.usuario["acertos"] = ((150-(self.personagem.municoes_totais + self.personagem.municoes))/self.zumbies_atingidos) *100 if not self.zumbies_atingidos == 0 else 0
-                    self.jogo.trocar_tela(TelaVitoria(self.jogo,self.tela,self.usuario))
                 if evento.key == pygame.K_r:
                     if self.personagem.municoes <= 0 and self.personagem.municoes_totais >= 30:
                         self.personagem.municoes = 30
@@ -406,6 +399,18 @@ class TelaJogo(Tela):
                         self.personagem.trocar_animacao(self.assets["pesonagem_recarregar"], 13)
                         self.recarregar_sound.play()
                         self.personagem_recarregando = True
+                # Teste para tela de vitoria 
+                if evento.key == pygame.K_t:
+                    self.usuario["vida"] = self.personagem.vidas
+                    self.usuario["municoes"] = self.personagem.municoes
+                    self.usuario["municoes_totais"] = self.personagem.municoes_totais
+                    self.usuario["zumbies_mortos"] = self.personagem.zumbies_mortos
+                    tiros_disparados = 150 - (self.personagem.municoes_totais + self.personagem.municoes)
+                    if self.zumbies_atingidos == 0:
+                        self.usuario["acertos"] = 0
+                    else:
+                        self.usuario["acertos"] = (self.zumbies_atingidos/tiros_disparados) *100 if tiros_disparados > 0 else 0
+                    self.jogo.trocar_tela(TelaVitoria(self.jogo,self.tela,self.usuario))
                 if evento.key == pygame.K_a:  
                     self.moving_left = True
                     self.moving_right = False
@@ -445,10 +450,11 @@ class TelaJogo(Tela):
                 self.usuario["municoes"] = self.personagem.municoes
                 self.usuario["municoes_totais"] = self.personagem.municoes_totais
                 self.usuario["zumbies_mortos"] = self.personagem.zumbies_mortos
+                tiros_disparados = 150 - (self.personagem.municoes_totais + self.personagem.municoes)
                 if self.zumbies_atingidos == 0:
                     self.usuario["acertos"] = 0
                 else:
-                    self.usuario["acertos"] = ((150-(self.personagem.municoes_totais + self.personagem.municoes))/self.zumbies_atingidos) *100
+                    self.usuario["acertos"] = (self.zumbies_atingidos/tiros_disparados) *100 if tiros_disparados > 0 else 0
                 self.jogo.trocar_tela(TelaVitoria(self.jogo,self.tela,self.usuario))
             else:
                 self.jogo.trocar_tela(TelaGameOver(self.jogo,self.tela))
