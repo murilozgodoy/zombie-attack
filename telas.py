@@ -1,6 +1,9 @@
 import pygame
 from personagens import Personagens, Zumbies, Tiro, Impacto
+from Aerea import AmeacaAerea
+from explosao import ExplosaoAerea
 from utilidades import Cronometro, FPS
+import random
 
 class Tela:
     def trata_eventos(self, eventos):
@@ -88,7 +91,6 @@ class TelaInstrucoes(Tela):
         cor_texto = (220, 220, 220)
         cor_titulo = (222, 177, 61)
 
-        # Instruções
         instrucoes = [
             "Mire com o mouse nos zumbis e atire pressionando o botão esquerdo.",
             "Ande para os lados pressionando as teclas 'A' (esquerda) e 'D' (direita).",
@@ -97,19 +99,17 @@ class TelaInstrucoes(Tela):
             "Sobreviva até o tempo acabar para vencer!"
         ]
 
-        # Caixa de texto
         largura_caixa = 1120
-        altura_caixa = 450  # aumentado um pouco para a nova linha
+        altura_caixa = 450 
         x_caixa = (self.tela["largura"] - largura_caixa) // 2
         y_caixa = (self.tela["altura"] - altura_caixa) // 2
         pygame.draw.rect(janela, cor_caixa, (x_caixa, y_caixa, largura_caixa, altura_caixa), border_radius=10)
 
-        # Título
+
         titulo = fonte_titulo.render("COMO JOGAR", True, cor_titulo)
         janela.blit(titulo, (x_caixa + (largura_caixa - titulo.get_width()) // 2, y_caixa + 25))
 
-        # Instruções
-        y_texto = y_caixa + 100
+        y_texto = y_caixa + 115
         for linha in instrucoes:
             texto = fonte_texto.render(linha, True, cor_texto)
             janela.blit(texto, (x_caixa + (largura_caixa - texto.get_width()) // 2, y_texto))
@@ -170,7 +170,10 @@ class TelaJogo(Tela):
         self.tela = tela
         self.zumbies = pygame.sprite.Group()
         self.tiros = pygame.sprite.Group()
-        self.impactos = pygame.sprite.Group() 
+        self.impactos = pygame.sprite.Group()
+        self.ameacas = pygame.sprite.Group()
+        self.ultimo_spawn_ameaca = pygame.time.get_ticks()
+        self.intervalo_ameaca = random.randint(1000, 3000)
         # self.corredores = pygame.sprite.Group()
         self.recarregar_sound = pygame.mixer.Sound("assets/snd/recarregar.wav")
         # self.arma_vazia = pygame.mixer.Sound("assets/snd/sem_municao.wav")
@@ -209,6 +212,7 @@ class TelaJogo(Tela):
             "personagem_dead": pygame.transform.scale(self.sprites["personagem_morre"],(self.sprites["personagem_morre"].get_width()*5,self.sprites["personagem_morre"].get_height()*5)),
             "pesonagem_recarregar": pygame.transform.scale(self.sprites["personagem_recarregar"],(self.sprites["personagem_recarregar"].get_width()*5,self.sprites["personagem_recarregar"].get_height()*5)),
             "zombie_walk_corredor": pygame.transform.scale(self.sprites["zumbi_andar_corredor"], (self.sprites["zumbi_andar_corredor"].get_width()*4.5, self.sprites["zumbi_andar_corredor"].get_height()*4.5)),
+            "explosao_aerea": pygame.image.load("assets/img/explosao.png"),
         }
         self.personagem = Personagens(self.assets['parado'], 7,self.tela)
         self.grupo_pesonagem = pygame.sprite.GroupSingle(self.personagem)
@@ -361,6 +365,14 @@ class TelaJogo(Tela):
         #     corredor = Zumbies_Corredores(self.assets["zombie_walk_corredor"], 8, self.tela)
         #     self.corredores.add(corredor)
 
+
+        agora = pygame.time.get_ticks()
+        if agora - self.ultimo_spawn_ameaca > self.intervalo_ameaca:
+            self.ultimo_spawn_ameaca = agora
+            self.intervalo_ameaca = random.randint(1000, 3000)
+            nova_ameaca = AmeacaAerea(self.tela["largura"])
+            self.ameacas.add(nova_ameaca)
+
     
         colisao_zumbi_personagem = pygame.sprite.groupcollide(self.grupo_pesonagem,self.zumbies,False,False)
         for personagem, zumbie in colisao_zumbi_personagem.items():
@@ -375,6 +387,26 @@ class TelaJogo(Tela):
                         self.grupo_pesonagem.remove(self.personagem)
                         self.estado = "morto"
                         self.tempo_morte = pygame.time.get_ticks()  # Marca o momento da morte
+
+        colisoes_ameaca = pygame.sprite.spritecollide(self.personagem, self.ameacas, False)
+        for ameaca in colisoes_ameaca:
+            self.personagem.vidas -= 15
+
+          
+            explosao = ExplosaoAerea(ameaca.rect.center, self.assets["explosao_aerea"], colunas=4, linhas=2, tamanho=(80, 80))
+            self.impactos.add(explosao)
+
+           
+            ameaca.kill()
+
+            # Se o personagem morreu
+            if self.personagem.vidas <= 0 and self.estado != "morto":
+                self.personagem.vidas = 0
+                morte = Impacto(self.personagem.image_rect.center, self.assets["personagem_dead"], 4, "Personagem")
+                self.impactos.add(morte)
+                self.grupo_pesonagem.remove(self.personagem)
+                self.estado = "morto"
+                self.tempo_morte = pygame.time.get_ticks()
     
         if self.estado == "morto" and self.tempo_morte is not None:
             agora = pygame.time.get_ticks()
@@ -418,7 +450,9 @@ class TelaJogo(Tela):
         self.zumbies.update()
         self.tiros.update()
         self.impactos.update()
+        self.ameacas.update()
         # self.corredores.update()
+        
 
         # Verificar movimento horizontal
         if self.moving_left or self.moving_right:
@@ -466,5 +500,6 @@ class TelaJogo(Tela):
             self.personagem.desenha(janela)
         # self.zumbies.draw(janela)
         self.tiros.draw(janela)
+        self.ameacas.draw(janela)
         self.impactos.draw(janela)
         pygame.display.update()
