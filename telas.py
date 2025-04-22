@@ -160,13 +160,16 @@ class TelaInstrucoes(Tela):
         instrucoes = [
             "Mire com o mouse nos zumbis e atire pressionando o botão esquerdo.",
             "Ande para os lados pressionando as teclas 'A' (esquerda) e 'D' (direita).",
-            "Não deixe os zumbis invadirem sua base de proteção.",
+            "Não deixe os zumbis invadirem sua base de proteção, caso contrário o jogo acaba.",
             "Evite que os carniçais de combate se aproximem de você, já que conseguem te atacar.",
+            "Desvie das bombas aéreas que caem a todo instante.",
+            "Recarregue a arma pressionando 'R'.",
+            "Dica: Capriche na mira para estar no ranking final de sobreviventes.",
             "Sobreviva até o tempo acabar para vencer!"
         ]
 
         largura_caixa = 1120
-        altura_caixa = 450 
+        altura_caixa = 570
         x_caixa = (self.tela["largura"] - largura_caixa) // 2
         y_caixa = (self.tela["altura"] - altura_caixa) // 2
         pygame.draw.rect(janela, cor_caixa, (x_caixa, y_caixa, largura_caixa, altura_caixa), border_radius=10)
