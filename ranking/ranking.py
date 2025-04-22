@@ -2,7 +2,7 @@
 import json
 import os
 
-FILE_PATH = 'ranking.json'
+FILE_PATH = 'ranking/ranking.json'
 
 def load_ranking():
     if not os.path.exists(FILE_PATH):

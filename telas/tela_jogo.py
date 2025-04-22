@@ -1,265 +1,17 @@
-import pygame,pygame.freetype
-from personagens import Tiro, Impacto
-from Personagens.Zumbies import Zumbies,Zumbies_Corredores
+import pygame, random
+from .tela import Tela
+from utilidades.tiro import Tiro
+from utilidades.impacto import Impacto
+from Personagens.Zumbies import Zumbies, Zumbies_Corredores
 from Personagens.Personagem import Personagens
-from Aerea import AmeacaAerea
-from explosao import ExplosaoAerea
-from ranking import add_score, load_ranking
-from utilidades import Cronometro, FPS
-import random
-
-class Tela:
-    def trata_eventos(self, eventos):
-        pass
-    def atualiza(self):
-        pass
-    def desenha(self, janela):
-        pass
-
-class TelaNome(Tela):
-    def __init__(self, jogo, tela):
-        self.jogo = jogo
-        self.tela = tela
-
-        # configurações de fonte e cores
-        self.font = pygame.font.Font("assets/font/PressStart2P.ttf", 32)
-        self.prompt_surf = self.font.render("Digite seu nome:", True, (222,177,61))
-
-        self.input_text = ""
-        self.color_inactive = pygame.Color('lightskyblue3')
-        self.color_active   = pygame.Color('dodgerblue2')
-        self.color = self.color_inactive
-
-        # retângulo do input (metade da largura, altura 50px)
-        w, h = tela["largura"] // 2, 50
-        x = (tela["largura"] - w) // 2
-        y = (tela["altura"]  - h) // 2
-        self.input_rect = pygame.Rect(x, y, w, h)
-        self.active = False  # só digita quando clica dentro
-
-    def trata_eventos(self, eventos):
-        for evento in eventos:
-            if evento.type == pygame.MOUSEBUTTONDOWN:
-                # ativa/desativa ao clicar no retângulo
-                if self.input_rect.collidepoint(evento.pos):
-                    self.active = not self.active
-                else:
-                    self.active = False
-                self.color = self.color_active if self.active else self.color_inactive
-
-            if evento.type == pygame.KEYDOWN and self.active:
-                if evento.key == pygame.K_RETURN:
-                    # usuário confirmou o nome: guarda e segue
-                    self.jogo.player_name = self.input_text.strip() or "Jogador"
-                    self.jogo.trocar_tela(TelaJogo(self.jogo, self.tela))
-                elif evento.key == pygame.K_BACKSPACE:
-                    self.input_text = self.input_text[:-1]
-                else:
-                    # limita tamanho se quiser
-                    if len(self.input_text) < 20:
-                        self.input_text += evento.unicode
-
-    def desenha(self, janela):
-        janela.fill((0, 0, 0))
-
-        # desenha prompt
-        prompt_x = (self.tela["largura"] - self.prompt_surf.get_width()) // 2
-        janela.blit(self.prompt_surf, (prompt_x, self.input_rect.y - 60))
-
-        # renderiza o texto atual
-        txt_surf = self.font.render(self.input_text, True, (255,255,255))
-        # redimensiona o rect se o texto ficou maior
-        width = max(self.input_rect.w, txt_surf.get_width()+10)
-        self.input_rect.w = width
-
-        # desenha caixa e texto
-        pygame.draw.rect(janela, self.color, self.input_rect, 2, border_radius=5)
-        janela.blit(txt_surf, (self.input_rect.x+5, self.input_rect.y+8))
-
-        pygame.display.flip()
+from Bombas.Aerea import AmeacaAerea
+from Bombas.explosao import ExplosaoAerea
+from ranking.ranking import add_score, load_ranking
+from utilidades.cronometro import Cronometro
+from utilidades.FPS import FPS
 
 
 
-
-class TelaInicial(Tela):
-    def __init__(self, jogo, tela):
-        self.jogo = jogo
-        self.tela = tela
-        self.fonte = pygame.font.Font("assets/font/PressStart2P.ttf", 30)
-        imagem = pygame.image.load("assets/img/Inicial.png")
-        self.image = pygame.transform.scale(imagem, (tela["largura"], tela["altura"]))
-        self.jogar = pygame.image.load("assets/img/Botao_jogar.png")
-        self.botao_jogar_rect = pygame.Rect((tela["largura"] - 640) // 2, (tela["altura"] - 175) // 2, 570, 160)
-        self.botao_instrucoes_rect = pygame.Rect((tela["largura"] - 640) // 2, (tela["altura"] + 235) // 2, 570, 160)
-        
-
-    def trata_eventos(self, eventos):
-        for evento in eventos:
-            if self.botao_jogar_rect.collidepoint(pygame.mouse.get_pos()):
-                if evento.type == pygame.MOUSEBUTTONDOWN and evento.button == 1:
-                    from telas import TelaJogo
-                    self.jogo.trocar_tela(TelaNome(self.jogo, self.tela))
-            if self.botao_instrucoes_rect.collidepoint(pygame.mouse.get_pos()):
-                if evento.type == pygame.MOUSEBUTTONDOWN and evento.button == 1:
-                    from telas import TelaInstrucoes
-                    self.jogo.trocar_tela(TelaInstrucoes(self.jogo, self.tela))
-
-    def desenha(self, janela):
-        janela.fill((0, 0, 0))
-        janela.blit(self.image, (0, 0))
-        pygame.draw.rect(janela, (255, 255, 255), self.botao_jogar_rect)
-        pygame.draw.rect(janela, (255, 0, 255), self.botao_instrucoes_rect)
-        pygame.display.flip()
-
-class TelaGameOver(Tela):
-    def __init__(self, jogo, tela):
-        self.jogo = jogo
-        self.tela = tela
-        pygame.mixer.quit()
-        self.image = pygame.transform.scale(pygame.image.load("assets/img/gameover.png"), (self.tela["largura"], self.tela['altura']))
-
-    def trata_eventos(self, eventos):
-        for evento in eventos:
-            if evento.type == pygame.KEYDOWN and evento.key == pygame.K_r:
-                from telas import TelaJogo
-                self.jogo.trocar_tela(TelaJogo(self.jogo, self.jogo.tela_atual.tela.copy()))
-
-
-    def desenha(self, janela):
-        janela.fill((0, 0, 0))
-        janela.blit(self.image, (0, 0))
-        pygame.display.flip()
-
-class TelaInstrucoes(Tela):
-    def __init__(self, jogo, tela):
-        self.jogo = jogo
-        self.tela = tela
-        self.image = pygame.transform.scale(pygame.image.load("assets/img/fundo.png"), (self.tela["largura"], self.tela['altura']))
-
-    def trata_eventos(self, eventos):
-        for evento in eventos:
-            if evento.type == pygame.KEYDOWN and evento.key == pygame.K_i:
-                from telas import TelaInicial
-                self.jogo.trocar_tela(TelaInicial(self.jogo, self.tela))
-            if evento.type == pygame.KEYDOWN and evento.key == pygame.K_s: #coloquei qualquer tecla, depois mudamos para a tecla que quisermos#
-                from telas import TelaJogo
-                self.jogo.trocar_tela(TelaJogo(self.jogo, self.tela))
-
-
-    def desenha(self, janela):
-        janela.fill((0, 0, 0))
-        janela.blit(self.image, (0, 0))
-
-   
-        fonte_titulo = pygame.font.SysFont('arialblack', 36)
-        fonte_texto = pygame.font.SysFont('lucidaconsole', 22)
-        fonte_acao = pygame.font.SysFont('lucidaconsole', 22) 
-
-        cor_caixa = (30, 30, 30)
-        cor_texto = (220, 220, 220)
-        cor_titulo = (222, 177, 61)
-
-        instrucoes = [
-            "Mire com o mouse nos zumbis e atire pressionando o botão esquerdo.",
-            "Ande para os lados pressionando as teclas 'A' (esquerda) e 'D' (direita).",
-            "Não deixe os zumbis invadirem sua base de proteção, caso contrário o jogo acaba.",
-            "Evite que os carniçais de combate se aproximem de você, já que conseguem te atacar.",
-            "Desvie das bombas aéreas que caem a todo instante.",
-            "Recarregue a arma pressionando 'R'.",
-            "Dica: Capriche na mira para estar no ranking final de sobreviventes.",
-            "Sobreviva até o tempo acabar para vencer!"
-        ]
-
-        largura_caixa = 1120
-        altura_caixa = 570
-        x_caixa = (self.tela["largura"] - largura_caixa) // 2
-        y_caixa = (self.tela["altura"] - altura_caixa) // 2
-        pygame.draw.rect(janela, cor_caixa, (x_caixa, y_caixa, largura_caixa, altura_caixa), border_radius=10)
-
-
-        titulo = fonte_titulo.render("COMO JOGAR", True, cor_titulo)
-        janela.blit(titulo, (x_caixa + (largura_caixa - titulo.get_width()) // 2, y_caixa + 25))
-
-        y_texto = y_caixa + 115
-        for linha in instrucoes:
-            texto = fonte_texto.render(linha, True, cor_texto)
-            janela.blit(texto, (x_caixa + (largura_caixa - texto.get_width()) // 2, y_texto))
-            y_texto += 40
-
-        y_texto += 45
-        texto_acao = fonte_acao.render("PRESSIONE 'S' PARA TENTAR SOBREVIVER AO APOCALIPSE OU 'I' PARA VOLTAR AO INÍCIO!", True, cor_titulo)
-        janela.blit(texto_acao, (x_caixa + (largura_caixa - texto_acao.get_width()) // 2, y_texto))
-
-        pygame.display.flip()
-
-
-class TelaVitoria(Tela):
-    def __init__(self, jogo, tela, usuario):
-        pygame.mixer.quit()
-        self.jogo   = jogo
-        self.tela   = tela
-        self.usuario = usuario
-        self.fonte  = pygame.font.Font("assets/font/PressStart2P.ttf", 30)
-        self.image  = pygame.transform.scale(
-            pygame.image.load("assets/img/vitoria_3.png"),
-            (tela["largura"], tela['altura'])
-        )
-
-        # --- registra no ranking e obtém lista atualizada ---
-        # use self.jogo.player_name como nome do jogador
-        pontos = (usuario["zumbies_mortos"] * 2) + usuario["vida"] + ( (usuario["acertos"]//100) * 200)
-        self.ranking = add_score(self.jogo.player_name, pontos)
-
-        # pré-render de estatísticas
-        self.zumbies_mortos = self.fonte.render(
-            f'Zumbis mortos: {usuario["zumbies_mortos"]}', True, (255,255,255))
-        
-        self.zumbies_mortos = self.fonte.render(f'Zumbis mortos: {self.usuario["zumbies_mortos"]}', True, (255, 255, 255))
-        self.zumbies_mortos = pygame.transform.scale(self.zumbies_mortos, (500, 100))
-        
-        self.vidas = self.fonte.render(f'Vida: {self.usuario["vida"]}', True, (255, 255, 255))
-        self.vidas = pygame.transform.scale(self.vidas, (500, 100))
-
-
-        self.municoes = self.fonte.render(f'Munições: {self.usuario["municoes_totais"] + self.usuario["municoes"]}', True, (255, 255, 255))
-        self.municoes = pygame.transform.scale(self.municoes, (500, 100))
-
-        self.acertos = self.fonte.render(f'% de Acertos: {self.usuario["acertos"]:.2f}', True, (255, 255, 255))
-        self.acertos = pygame.transform.scale(self.acertos, (500, 100))
-
-    def trata_eventos(self, eventos):
-        for evento in eventos:
-            if evento.type == pygame.KEYDOWN and evento.key == pygame.K_r:
-                from telas import TelaJogo
-                self.jogo.trocar_tela(TelaJogo(self.jogo, self.jogo.tela_atual.tela.copy()))
-
-
-    def desenha(self, janela):
-        janela.fill((0, 0, 0))
-        janela.blit(self.image, (0, 0))
-        janela.blit(self.vidas, ((self.tela["largura"] - 750), (self.tela["altura"] - 900)))
-        janela.blit(self.zumbies_mortos, ((self.tela["largura"] - 750), (self.tela["altura"] - 700)))
-        janela.blit(self.municoes, ((self.tela["largura"] - 750), (self.tela["altura"] - 500)))
-        janela.blit(self.acertos, ((self.tela["largura"] - 750), (self.tela["altura"] - 300)))
-        # Exibe o ranking (top 5)
-        # emoji_font = pygame.freetype.Font("C:/Windows/Fonts/seguiemj.ttf", 32)
-        x_rank, y_rank = 100, 300
-        # emoji_font.render_to(janela, (100, 296), "🏆", fgcolor=(222,177,61))
-        titulo = self.fonte.render(" Top 5 Jogadores", True, (222,177,61))
-        janela.blit(titulo, (x_rank, y_rank))
-        y_rank += 40
-
-        for pos, entry in enumerate(self.ranking[:5], start=1):
-            txt = self.fonte.render(
-                f'{pos}. {entry["name"]}: {entry["score"]:.0f}',
-                True, (255,255,255)
-            )
-            janela.blit(txt, (x_rank, y_rank))
-            y_rank += 30
-
-        pygame.display.flip()
-        
-        
 class TelaJogo(Tela):
     def __init__(self, jogo,tela):
         pygame.mixer.init()
@@ -415,6 +167,7 @@ class TelaJogo(Tela):
                         self.usuario["acertos"] = 0
                     else:
                         self.usuario["acertos"] = (self.zumbies_atingidos/tiros_disparados) *100 if tiros_disparados > 0 else 0
+                    from telas import TelaVitoria
                     self.jogo.trocar_tela(TelaVitoria(self.jogo,self.tela,self.usuario))
                 if evento.key == pygame.K_a:  
                     self.moving_left = True
@@ -460,8 +213,10 @@ class TelaJogo(Tela):
                     self.usuario["acertos"] = 0
                 else:
                     self.usuario["acertos"] = (self.zumbies_atingidos/tiros_disparados) *100 if tiros_disparados > 0 else 0
+                    from telas import TelaVitoria
                 self.jogo.trocar_tela(TelaVitoria(self.jogo,self.tela,self.usuario))
             else:
+                from telas import TelaGameOver
                 self.jogo.trocar_tela(TelaGameOver(self.jogo,self.tela))
 
         agora = pygame.time.get_ticks()
@@ -525,6 +280,7 @@ class TelaJogo(Tela):
         if self.estado == "morto" and self.tempo_morte is not None:
             agora = pygame.time.get_ticks()
             if agora - self.tempo_morte > self.cooldown_gameover:
+                from telas import TelaGameOver
                 self.jogo.trocar_tela(TelaGameOver(self.jogo, self.tela))
  
         colisao_tiro_zumbi = pygame.sprite.groupcollide(self.tiros, self.zumbies, True, False)
