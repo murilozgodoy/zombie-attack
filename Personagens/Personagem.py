@@ -1,3 +1,5 @@
+import pygame
+
 class Personagens(pygame.sprite.Sprite):
     def __init__(self, image, frames, tela):
         super().__init__()

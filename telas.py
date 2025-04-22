@@ -484,19 +484,20 @@ class TelaJogo(Tela):
             self.ameacas.add(nova_ameaca)
 
 
-        colisao_zumbi_personagem = pygame.sprite.groupcollide(self.grupo_pesonagem,self.zumbies,False,False)
+        colisao_zumbi_personagem = pygame.sprite.groupcollide(self.grupo_pesonagem, self.zumbies, False, False)
         for personagem, zumbie in colisao_zumbi_personagem.items():
             for zumbi in zumbie:
-                if zumbi.estado != 'Ataque':  
-                    zumbi.trocar_animacao(self.assets["zombie_attack"], 5, dano=False, novo_estado='Ataque')
+                if zumbi.estado == 'andando':  # só inicia ataque se ainda estiver andando
+                    zumbi.trocar_animacao(self.assets["zombie_attack"], 5, novo_estado='Ataque')
                     self.personagem.vidas -= 10
+
                     if self.personagem.vidas <= 0 and self.estado != "morto":
                         self.personagem.vidas = 0
                         morte = Impacto(self.personagem.image_rect.center, self.assets["personagem_dead"], 4, "Personagem")
                         self.impactos.add(morte)
                         self.grupo_pesonagem.remove(self.personagem)
                         self.estado = "morto"
-                        self.tempo_morte = pygame.time.get_ticks()  # Marca o momento da morte
+                        self.tempo_morte = pygame.time.get_ticks()
 
         colisoes_ameaca = pygame.sprite.spritecollide(self.personagem, self.ameacas, False)
         for ameaca in colisoes_ameaca:
@@ -531,15 +532,18 @@ class TelaJogo(Tela):
             for zumbi in zumbis_atingidos:
                 zumbi.vidas -= 1
                 self.zumbies_atingidos += 1
+
                 if zumbi.vidas <= 0:
-                    impacto = Impacto(zumbi.image_rect.center,self.assets["zumbi_morto"],5,"zumbi")
-                    self.impactos.add(impacto) 
+                    impacto = Impacto(zumbi.image_rect.center, self.assets["zumbi_morto"], 5, "zumbi")
+                    self.impactos.add(impacto)
                     self.zumbies.remove(zumbi)
                     self.tiros.remove(tiro)
                     self.personagem.zumbies_mortos += 1
                 else:
-                    if zumbi.estado != 'ferido': #'assets/img/Zombie_1/Hurt_invertida.png'
-                        zumbi.trocar_animacao(self.assets["zumbi_ferido"], 4, dano=True, novo_estado='ferido')
+                    if zumbi.estado != 'dano':
+                        zumbi.trocar_animacao(self.assets["zumbi_ferido"], 4, dano=True, novo_estado='dano')
+
+
         colisao_tiro_corredor = pygame.sprite.groupcollide(self.tiros, self.corredores, True, False)
         for tiro, corredores_atingidos in colisao_tiro_corredor.items():    
             for corredor in corredores_atingidos:
