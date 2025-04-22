@@ -304,8 +304,9 @@ class TelaJogo(Tela):
             "zombie_attack": pygame.transform.scale(self.sprites["zumbi_ataque"],(self.sprites["zumbi_ataque"].get_width()*5,self.sprites["zumbi_ataque"].get_height()*5)),
             "personagem_dead": pygame.transform.scale(self.sprites["personagem_morre"],(self.sprites["personagem_morre"].get_width()*5,self.sprites["personagem_morre"].get_height()*5)),
             "pesonagem_recarregar": pygame.transform.scale(self.sprites["personagem_recarregar"],(self.sprites["personagem_recarregar"].get_width()*5,self.sprites["personagem_recarregar"].get_height()*5)),
+            "explosao_aerea": pygame.image.load("assets/img/explodindo.png"),
+            "bomba_aerea": pygame.transform.scale(pygame.image.load("assets/img/boma_aerea.png").convert_alpha(), (80, 75)),
             "zombie_walk_corredor": pygame.transform.scale(self.sprites["zumbi_andar_corredor"], (self.sprites["zumbi_andar_corredor"].get_width()*4.5, self.sprites["zumbi_andar_corredor"].get_height()*4.5)),
-            "explosao_aerea": pygame.image.load("assets/img/explosao.png"),
             "zumbi_morte_corredor": pygame.transform.scale(self.sprites["zumbi_morte_corredor"], (self.sprites["zumbi_morte_corredor"].get_width()*4.5, self.sprites["zumbi_morte_corredor"].get_height()*4.5)),
         }
         self.personagem = Personagens(self.assets['parado'], 7,self.tela)
@@ -467,7 +468,8 @@ class TelaJogo(Tela):
         if agora - self.ultimo_spawn_ameaca > self.intervalo_ameaca:
             self.ultimo_spawn_ameaca = agora
             self.intervalo_ameaca = random.randint(1000, 3000)
-            nova_ameaca = AmeacaAerea(self.tela["largura"])
+
+            nova_ameaca = AmeacaAerea(self.assets["bomba_aerea"], self.tela["largura"])
             self.ameacas.add(nova_ameaca)
 
 
@@ -487,23 +489,26 @@ class TelaJogo(Tela):
 
         colisoes_ameaca = pygame.sprite.spritecollide(self.personagem, self.ameacas, False)
         for ameaca in colisoes_ameaca:
-            self.personagem.vidas -= 15
+            if ameaca.rect.bottom <= self.personagem.rect.centery:
+                self.personagem.vidas -= 15
 
-          
-            explosao = ExplosaoAerea(ameaca.rect.center, self.assets["explosao_aerea"], colunas=4, linhas=2, tamanho=(80, 80))
-            self.impactos.add(explosao)
+    
+                offset_x = 0
+                offset_y = 37 
+                explosao_pos = (ameaca.rect.centerx + offset_x, ameaca.rect.centery + offset_y)
 
-           
-            ameaca.kill()
+                explosao = ExplosaoAerea(explosao_pos, self.assets["explosao_aerea"], colunas=5, linhas=1, tamanho=(80, 80))
+                self.impactos.add(explosao)
 
-            # Se o personagem morreu
-            if self.personagem.vidas <= 0 and self.estado != "morto":
-                self.personagem.vidas = 0
-                morte = Impacto(self.personagem.image_rect.center, self.assets["personagem_dead"], 4, "Personagem")
-                self.impactos.add(morte)
-                self.grupo_pesonagem.remove(self.personagem)
-                self.estado = "morto"
-                self.tempo_morte = pygame.time.get_ticks()
+                ameaca.kill()
+
+                if self.personagem.vidas <= 0 and self.estado != "morto":
+                    self.personagem.vidas = 0
+                    morte = Impacto(self.personagem.image_rect.center, self.assets["personagem_dead"], 4, "Personagem")
+                    self.impactos.add(morte)
+                    self.grupo_pesonagem.remove(self.personagem)
+                    self.estado = "morto"
+                    self.tempo_morte = pygame.time.get_ticks()
     
         if self.estado == "morto" and self.tempo_morte is not None:
             agora = pygame.time.get_ticks()

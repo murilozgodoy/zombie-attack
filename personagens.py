@@ -158,7 +158,7 @@ class Zumbies(pygame.sprite.Sprite):
 
         # self.image_rect.midbottom = self.rect.midbottom
         self.vidas = 2
-        self.velocidade = 10
+        self.velocidade = 13
         self.estado = 'andando'
         self.animacao_dano = False
 
@@ -240,7 +240,7 @@ class Zumbies_Corredores(pygame.sprite.Sprite):
 
         # self.image_rect.midbottom = self.rect.midbottom
         self.vidas = 2
-        self.velocidade = 20
+        self.velocidade = 30
         self.estado = 'andando'
         self.animacao_dano = False
 

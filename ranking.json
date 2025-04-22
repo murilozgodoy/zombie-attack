@@ -1,5 +1,13 @@
 [
     {
+        "name": "Teste",
+        "score": 20
+    },
+    {
+        "name": "Murilo",
+        "score": 17
+    },
+    {
         "name": "Nader",
         "score": 2
     }
