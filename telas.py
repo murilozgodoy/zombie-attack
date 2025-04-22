@@ -1,5 +1,5 @@
 import pygame,pygame.freetype
-from personagens import Personagens, Zumbies, Tiro, Impacto
+from personagens import Personagens, Zumbies, Tiro, Impacto,Zumbies_Corredores
 from Aerea import AmeacaAerea
 from explosao import ExplosaoAerea
 from ranking import add_score, load_ranking
@@ -266,7 +266,7 @@ class TelaJogo(Tela):
         self.ameacas = pygame.sprite.Group()
         self.ultimo_spawn_ameaca = pygame.time.get_ticks()
         self.intervalo_ameaca = random.randint(1000, 3000)
-        # self.corredores = pygame.sprite.Group()
+        self.corredores = pygame.sprite.Group()
         self.recarregar_sound = pygame.mixer.Sound("assets/snd/recarregar.wav")
         # self.arma_vazia = pygame.mixer.Sound("assets/snd/sem_municao.wav")
         # self.arma_vazia.set_volume(1.0)
@@ -287,6 +287,7 @@ class TelaJogo(Tela):
             "zumbi_andar":pygame.image.load("assets/img/Zombie_1/Walk.png"),
             "zumbi_ataque":pygame.image.load("assets/img/Zombie_1/Attack.png"),
             "zumbi_andar_corredor":pygame.image.load("assets/img/ZombieMan/Walk.png"),
+            "zumbi_morte_corredor":pygame.image.load("assets/img/ZombieMan/Dead.png"),
         }
         self.assets = {
             "img_fundo": pygame.transform.scale(pygame.image.load("assets/img/Fundo.png"), (self.tela["largura"], self.tela["altura"])),
@@ -305,6 +306,7 @@ class TelaJogo(Tela):
             "pesonagem_recarregar": pygame.transform.scale(self.sprites["personagem_recarregar"],(self.sprites["personagem_recarregar"].get_width()*5,self.sprites["personagem_recarregar"].get_height()*5)),
             "zombie_walk_corredor": pygame.transform.scale(self.sprites["zumbi_andar_corredor"], (self.sprites["zumbi_andar_corredor"].get_width()*4.5, self.sprites["zumbi_andar_corredor"].get_height()*4.5)),
             "explosao_aerea": pygame.image.load("assets/img/explosao.png"),
+            "zumbi_morte_corredor": pygame.transform.scale(self.sprites["zumbi_morte_corredor"], (self.sprites["zumbi_morte_corredor"].get_width()*4.5, self.sprites["zumbi_morte_corredor"].get_height()*4.5)),
         }
         self.personagem = Personagens(self.assets['parado'], 7,self.tela)
         self.grupo_pesonagem = pygame.sprite.GroupSingle(self.personagem)
@@ -455,10 +457,10 @@ class TelaJogo(Tela):
             self.ultima_geracao = agora
             novo_zumbi = Zumbies(self.assets["zombie_walk"], 10, self.tela)
             self.zumbies.add(novo_zumbi)
-        # if agora - self.ultima_geracao_corredores > (self.intervalo_geracao + 1000):
-        #     self.ultima_geracao_corredores = agora
-        #     corredor = Zumbies_Corredores(self.assets["zombie_walk_corredor"], 8, self.tela)
-        #     self.corredores.add(corredor)
+        if agora - self.ultima_geracao_corredores > (self.intervalo_geracao + 1000):
+            self.ultima_geracao_corredores = agora
+            corredor = Zumbies_Corredores(self.assets["zombie_walk_corredor"], 8, self.tela)
+            self.corredores.add(corredor)
 
 
         agora = pygame.time.get_ticks()
@@ -468,7 +470,7 @@ class TelaJogo(Tela):
             nova_ameaca = AmeacaAerea(self.tela["largura"])
             self.ameacas.add(nova_ameaca)
 
-    
+
         colisao_zumbi_personagem = pygame.sprite.groupcollide(self.grupo_pesonagem,self.zumbies,False,False)
         for personagem, zumbie in colisao_zumbi_personagem.items():
             for zumbi in zumbie:
@@ -522,7 +524,20 @@ class TelaJogo(Tela):
                 else:
                     if zumbi.estado != 'ferido': #'assets/img/Zombie_1/Hurt_invertida.png'
                         zumbi.trocar_animacao(self.assets["zumbi_ferido"], 4, dano=True, novo_estado='ferido')
-
+        colisao_tiro_corredor = pygame.sprite.groupcollide(self.tiros, self.corredores, True, False)
+        for tiro, corredores_atingidos in colisao_tiro_corredor.items():    
+            for corredor in corredores_atingidos:
+                corredor.vidas -= 1
+                self.zumbies_atingidos += 1
+                if corredor.vidas <= 0:
+                    impacto = Impacto(corredor.image_rect.center,self.assets["zumbi_morte_corredor"],5,"zumbi")
+                    self.impactos.add(impacto) 
+                    self.corredores.remove(corredor)
+                    self.tiros.remove(tiro)
+                    self.personagem.zumbies_mortos += 1
+                # else:
+                #     if corredor.estado != 'ferido':
+                #         corredor.trocar_animacao(self.assets["zumbi_ferido"], 4, dano=True, novo_estado='ferido')
         # Atualizar as animações do personagem e verificar o término da animação de tiro
         if self.animacao_tiro:
                 if self.personagem.frame_atual == len(self.personagem.frames) - 1:  # Último quadro
@@ -546,7 +561,7 @@ class TelaJogo(Tela):
         self.tiros.update()
         self.impactos.update()
         self.ameacas.update()
-        # self.corredores.update()
+        self.corredores.update()
         
 
         # Verificar movimento horizontal
@@ -587,9 +602,9 @@ class TelaJogo(Tela):
         for zumbi in self.zumbies:
             pygame.draw.rect(janela,(0,255,0),zumbi.rect)
             zumbi.desenha(janela)
-        # for corredores in self.corredores:
-        #     pygame.draw.rect(janela,(0,255,0),corredores.rect)
-        #     corredores.desenha(janela)
+        for corredores in self.corredores:
+            # pygame.draw.rect(janela,(0,255,0),corredores.rect)
+            corredores.desenha(janela)
             
         if self.personagem in self.grupo_pesonagem:
             self.personagem.desenha(janela)
