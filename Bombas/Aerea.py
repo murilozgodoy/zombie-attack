@@ -10,7 +10,7 @@ class AmeacaAerea(pygame.sprite.Sprite):
 
     def gerar_posicao(self, largura_tela):
         margem_inicial = 100
-        limite_direito = int(largura_tela * 0.5)
+        limite_direito = int(largura_tela * 0.8)
         x = random.randint(margem_inicial, limite_direito)
         return (x, -20)
 
