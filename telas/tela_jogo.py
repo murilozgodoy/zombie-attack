@@ -388,9 +388,9 @@ class TelaJogo(Tela):
         # Verificar movimento vertical
         if self.moving_up or self.moving_down:
             if self.moving_up and  self.personagem.rect.y - self.personagem.rect.height >= 0:
-                self.personagem.mover(0, -30)
+                self.personagem.mover(0, -40)
             if self.moving_down and  self.personagem.rect.y + self.personagem.rect.height < self.tela["altura"]:
-                self.personagem.mover(0, 30)
+                self.personagem.mover(0, 40)
         if self.personagem.vidas < 0:
             self.personagem.vidas = 0
     def desenha(self, janela):
