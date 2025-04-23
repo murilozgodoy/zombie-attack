@@ -34,9 +34,6 @@ class TelaJogo(Tela):
         # self.arma_vazia.set_volume(1.0)
         self.tiro_sound = pygame.mixer.Sound("assets/snd/som_tiro.wav")
         self.tiro_sound.set_volume(0.1)
-        self.som_ambiente = pygame.mixer.Sound("assets/snd/som_ambiente.wav")
-        self.som_ambiente.set_volume(0.1)
-        self.som_ambiente.play(-1)
         self.sprites = {
             "personagem_atirando":pygame.image.load("assets/img/Soldier_1/Shot_2.png"),
             "personagem_parado":pygame.image.load("assets/img/Idle.png"),
