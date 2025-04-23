@@ -1,4 +1,5 @@
 import pygame
+from random import randint
 class Zumbies(pygame.sprite.Sprite):
     def __init__(self, imagem_andar, frames_andar, tela):
         super().__init__()
@@ -20,9 +21,10 @@ class Zumbies(pygame.sprite.Sprite):
         altura_frame = 128 * 5
 
         # Frame visual
+        y = randint(180,350)
         self.image_rect = pygame.Rect(
             tela["largura"],
-            tela["altura"] - 200,
+            tela["altura"] - y,
             largura_frame,
             altura_frame
         )
@@ -32,7 +34,7 @@ class Zumbies(pygame.sprite.Sprite):
         hitbox_altura = 350
         self.rect = pygame.Rect(
             self.image_rect.centerx - hitbox_largura // 2,
-            tela["altura"] - 400,
+            tela["altura"] - y*2,
             hitbox_largura,
             hitbox_altura
         )
@@ -105,25 +107,43 @@ class Zumbies_Corredores(pygame.sprite.Sprite):
         self.intervalo_animacao = 100
         largura_frame = 112 * 5
         altura_frame = 128 * 5
+        y = randint(0,1)
+        if y == 0:
+            self.image_rect = pygame.Rect(tela["largura"] ,
+                tela["altura"] - 20,
+                largura_frame,
+                altura_frame - 190
+            )
 
-        # Frame da sprite (imagem visual do personagem)
-        self.image_rect = pygame.Rect(tela["largura"] ,
-            tela["altura"] - 20,
-            largura_frame,
-            altura_frame - 190
-        )
+            # Hitbox mais precisa (centralizada na parte do corpo)
+            hitbox_largura = 150
+            hitbox_altura = 300
 
-        # Hitbox mais precisa (centralizada na parte do corpo)
-        hitbox_largura = 150
-        hitbox_altura = 300
+            # Alinha o centro da hitbox com a parte inferior do personagem (os pés)
+            self.rect = pygame.Rect(
+                (self.image_rect.centerx - hitbox_largura // 2) ,
+                tela["altura"] - 300,
+                hitbox_largura,
+                hitbox_altura
+            )
+        else:
+            self.image_rect = pygame.Rect(tela["largura"] ,
+                tela["altura"] - 20,
+                largura_frame,
+                altura_frame - 190
+            )
 
-        # Alinha o centro da hitbox com a parte inferior do personagem (os pés)
-        self.rect = pygame.Rect(
-            (self.image_rect.centerx - hitbox_largura // 2) ,
-             tela["altura"] - 600,
-            hitbox_largura,
-            hitbox_altura
-        )
+            # Hitbox mais precisa (centralizada na parte do corpo)
+            hitbox_largura = 150
+            hitbox_altura = 300
+
+            # Alinha o centro da hitbox com a parte inferior do personagem (os pés)
+            self.rect = pygame.Rect(
+                (self.image_rect.centerx - hitbox_largura // 2) ,
+                tela["altura"] - 600,
+                hitbox_largura,
+                hitbox_altura
+            )
 
         # self.image_rect.midbottom = self.rect.midbottom
         self.vidas = 2
