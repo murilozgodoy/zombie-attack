@@ -4,7 +4,7 @@ from .tela_nome import TelaNome
 from .tela_instrucoes import TelaInstrucoes
 
 class TelaInicial(Tela):
-    def _init_(self, jogo, tela):
+    def __init__(self, jogo, tela):
         self.jogo = jogo
         self.tela = tela
         self.fonte = pygame.font.Font("assets/font/PressStart2P.ttf", 30)
