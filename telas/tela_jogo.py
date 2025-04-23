@@ -9,6 +9,7 @@ from Bombas.explosao import ExplosaoAerea
 from ranking.ranking import add_score, load_ranking
 from utilidades.cronometro import Cronometro
 from utilidades.FPS import FPS
+import math
 # from utilidades.kit_medico import KitMedico
 
 
@@ -116,6 +117,10 @@ class TelaJogo(Tela):
         if self.estado == "morto":
             return
         if self.personagem_recarregando:
+            self.moving_left = False
+            self.moving_right = False
+            self.moving_up = False
+            self.moving_down = False
             return
         for evento in eventos:
             if evento.type == pygame.MOUSEBUTTONDOWN and evento.button == 1:
@@ -249,19 +254,22 @@ class TelaJogo(Tela):
 
         colisao_zumbi_personagem = pygame.sprite.groupcollide(self.grupo_pesonagem, self.zumbies, False, False)
         for personagem, zumbie in colisao_zumbi_personagem.items():
-                    for zumbi in zumbie:
-                        if zumbi.estado == 'andando':  # só inicia ataque se ainda estiver andando
-                            if zumbi.rect.centery == self.personagem.rect.centery:
-                                zumbi.trocar_animacao(self.assets["zombie_attack"], 5, novo_estado='Ataque')
-                                self.personagem.vidas -= 10
-                                self.zumbi_grunindo.play()
-                                if self.personagem.vidas <= 0 and self.estado != "morto":
-                                    self.personagem.vidas = 0
-                                    morte = Impacto(self.personagem.image_rect.center, self.assets["personagem_dead"], 4, "Personagem")
-                                    self.impactos.add(morte)
-                                    self.grupo_pesonagem.remove(self.personagem)
-                                    self.estado = "morto"
-                                    self.tempo_morte = pygame.time.get_ticks()
+            for zumbi in zumbie:
+                if zumbi.estado == 'andando':  # só inicia ataque se ainda estiver andando
+                    dx = self.personagem.rect.centerx - zumbi.rect.centerx
+                    dy = self.personagem.rect.centery - zumbi.rect.centery
+                    distancia = math.hypot(dx, dy)
+                    if distancia < 70:  # Ajuste esse valor para calibrar proximidade ideal
+                            zumbi.trocar_animacao(self.assets["zombie_attack"], 5, novo_estado='Ataque')
+                            self.personagem.vidas -= 10
+                            self.zumbi_grunindo.play()
+                            if self.personagem.vidas <= 0 and self.estado != "morto":
+                                self.personagem.vidas = 0
+                                morte = Impacto(self.personagem.image_rect.center, self.assets["personagem_dead"], 4, "Personagem")
+                                self.impactos.add(morte)
+                                self.grupo_pesonagem.remove(self.personagem)
+                                self.estado = "morto"
+                                self.tempo_morte = pygame.time.get_ticks()
 
         colisoes_ameaca = pygame.sprite.spritecollide(self.personagem, self.ameacas, False)
         for ameaca in colisoes_ameaca:
