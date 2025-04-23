@@ -27,3 +27,7 @@ OBS: se estiver no windows, coloque a escala da sua tela em 100%
 ## Link para vídeo demostração
 
 https://youtu.be/nURn7oZUbBs
+
+## Link para acessar o site
+
+https://insper-classroom.github.io/projeto-pygame-site-time-preto-nader-e-murilo/
