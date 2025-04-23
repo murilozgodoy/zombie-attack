@@ -37,6 +37,8 @@ class TelaInstrucoes(Tela):
         instrucoes = [
             "Mire com o cursor do mouse nos zumbis e atire pressionando o botão esquerdo.",
 
+            "Você enfrentará diferentes inimigos: corredores espectrais (morrem com 2 tiros) e carniçais de combate (3 tiros).",
+
             "Ande pressionando as teclas 'A' (trás), 'D' (frente), 'W' (esquerda) e 'S' (direita).",
 
             "Não deixe os zumbis invadirem sua base de proteção, caso contrário uma sirene toca e o jogo acaba.",
@@ -54,7 +56,7 @@ class TelaInstrucoes(Tela):
             "DICA: Capriche na mira e evite tomar dano para estar no ranking final de sobreviventes.",
         ]
 
-        largura_caixa = 1330
+        largura_caixa = 1520
         altura_caixa = 600
         x_caixa = (self.tela["largura"] - largura_caixa) // 2
         y_caixa = (self.tela["altura"] - altura_caixa) // 2
