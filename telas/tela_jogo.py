@@ -10,7 +10,6 @@ from ranking.ranking import add_score, load_ranking
 from utilidades.cronometro import Cronometro
 from utilidades.FPS import FPS
 import math
-# from utilidades.kit_medico import KitMedico
 
 
 
@@ -38,8 +37,6 @@ class TelaJogo(Tela):
         self.duracao = self.sirene.get_length()
         self.explosao = pygame.mixer.Sound("assets/snd/explosao.wav")
         self.zumbi_grunindo.set_volume(0.5)
-        # self.arma_vazia = pygame.mixer.Sound("assets/snd/sem_municao.wav")
-        # self.arma_vazia.set_volume(1.0)
         self.tiro_sound = pygame.mixer.Sound("assets/snd/som_tiro.wav")
         self.tiro_sound.set_volume(0.1)
         self.sprites = {
@@ -55,14 +52,12 @@ class TelaJogo(Tela):
             "zumbi_ataque":pygame.image.load("assets/img/Zombie_1/Attack.png"),
             "zumbi_andar_corredor":pygame.image.load("assets/img/ZombieMan/Walk.png"),
             "zumbi_morte_corredor":pygame.image.load("assets/img/ZombieMan/Dead.png"),
-            "kit_medico":pygame.image.load("assets/img/kitmedico.png"),
             "corredor_ferido":pygame.image.load("assets/img/ZombieMan/Hurt.png"),
             "municoes":pygame.image.load("assets/img/municoes.png"),
             "vida" :pygame.image.load("assets/img/vida.png"),
         }
         self.assets = {
             "img_fundo": pygame.transform.scale(pygame.image.load("assets/img/Fundo.png"), (self.tela["largura"], self.tela["altura"])),
-            "kit_medico": pygame.transform.scale(pygame.image.load("assets/img/kitmedico.png"), (100, 100)),
             "placa": pygame.transform.scale(pygame.image.load("assets/img/placa.png"), (150, 150)),
             "fonte": pygame.font.Font("assets/font/PressStart2P.ttf", 30),
             "mira": pygame.transform.scale(pygame.image.load("assets/img/mira2.png"), (27, 27)),
@@ -193,12 +188,8 @@ class TelaJogo(Tela):
                     self.moving_up = True
                 if evento.key == pygame.K_s:  
                     self.moving_down = True
-            # if evento.type == pygame.MOUSEBUTTONUP and evento.button == 1:
-            #         self.animacao_repetir = False  # Para de repetir quando a tecla for solta
-            #         # self.ultima_update = agora
             if evento.type == pygame.KEYUP:
-                # if agora - self.ultimo_update > self.cooldown:
-                        
+
                 if evento.key == pygame.K_a:
                     self.moving_left = False
                     if not self.moving_right:
@@ -400,9 +391,6 @@ class TelaJogo(Tela):
         texto_fps = self.assets["fonte"].render(f'FPS: {self.fps_monitor.fps:.2f}', True, (255, 255, 255))
         texto_fps = pygame.transform.scale(texto_fps, (150, 30))
         janela.blit(texto_fps, ((self.tela["largura"]- 150), (self.tela["altura"] - 30)))
-        # ## Kit medico
-        # janela.blit(self.kit_medico.image, self.kit_medico.rect)
-        # pygame.draw.rect(janela, (255, 0, 0), self.kit_medico.rect, 2)  # Desenha a hitbox para depuração
         janela.blit(self.assets["placa"], (self.tela["largura"] - 1600, 400))
         
 
@@ -428,12 +416,10 @@ class TelaJogo(Tela):
         for zumbi in self.zumbies:
             zumbi.desenha(janela)
         for corredores in self.corredores:
-            # pygame.draw.rect(janela,(0,255,0),corredores.rect)
             corredores.desenha(janela)
             
         if self.personagem in self.grupo_pesonagem:
             self.personagem.desenha(janela)
-        # self.zumbies.draw(janela)
         self.tiros.draw(janela)
         self.ameacas.draw(janela)
         self.impactos.draw(janela)

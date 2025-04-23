@@ -16,9 +16,6 @@ class TelaInstrucoes(Tela):
             if evento.type == pygame.KEYDOWN and evento.key == pygame.K_i:
                 from telas import TelaInicial
                 self.jogo.trocar_tela(TelaInicial(self.jogo, self.tela))
-            if evento.type == pygame.KEYDOWN and evento.key == pygame.K_s: #coloquei qualquer tecla, depois mudamos para a tecla que quisermos#
-                from telas import TelaJogo
-                self.jogo.trocar_tela(TelaJogo(self.jogo, self.tela))
 
 
     def desenha(self, janela):
@@ -73,7 +70,7 @@ class TelaInstrucoes(Tela):
             y_texto += 40
 
         y_texto += 45
-        texto_acao = fonte_acao.render("PRESSIONE 'S' PARA TENTAR SOBREVIVER AO APOCALIPSE OU 'I' PARA VOLTAR AO INÍCIO!", True, cor_titulo)
+        texto_acao = fonte_acao.render("PRESSIONE 'I' PARA VOLTAR AO INÍCIO!", True, cor_titulo)
         janela.blit(texto_acao, (x_caixa + (largura_caixa - texto_acao.get_width()) // 2, y_texto))
 
         pygame.display.flip()
