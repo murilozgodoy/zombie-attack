@@ -45,7 +45,7 @@ class TelaInstrucoes(Tela):
 
             "Evite que os carniçais de combate se aproximem de você, já que conseguem te atacar.",
 
-            "Recarregue a arma pressionando 'R'.",
+            "Recarregue a arma pressionando 'R' (lembrando que você não consegue andar enquanto recarrega).",
 
             "Não deixe com que as bombas aéreas caiam em você.",
 

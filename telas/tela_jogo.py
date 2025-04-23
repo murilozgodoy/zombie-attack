@@ -246,7 +246,7 @@ class TelaJogo(Tela):
         agora = pygame.time.get_ticks()
         if agora - self.ultimo_spawn_ameaca > self.intervalo_ameaca:
             self.ultimo_spawn_ameaca = agora
-            self.intervalo_ameaca = random.randint(1000, 2000)
+            self.intervalo_ameaca = random.randint(1000, 1600)
 
             nova_ameaca = AmeacaAerea(self.assets["bomba_aerea"], self.tela["largura"])
             self.ameacas.add(nova_ameaca)
