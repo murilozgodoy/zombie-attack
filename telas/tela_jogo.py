@@ -54,7 +54,7 @@ class TelaJogo(Tela):
             "img_fundo": pygame.transform.scale(pygame.image.load("assets/img/Fundo.png"), (self.tela["largura"], self.tela["altura"])),
             "kit_medico": pygame.transform.scale(pygame.image.load("assets/img/kitmedico.png"), (100, 100)),
             "fonte": pygame.font.Font("assets/font/PressStart2P.ttf", 30),
-            "mira": pygame.transform.scale(pygame.image.load("assets/img/mira.png"), (27, 27)),
+            "mira": pygame.transform.scale(pygame.image.load("assets/img/mira2.png"), (27, 27)),
             "bala": pygame.transform.scale(pygame.image.load("assets/img/bala.png"), (20, 20)),
             "tiro": pygame.transform.scale(self.sprites["personagem_atirando"],(self.sprites["personagem_atirando"].get_width()*5,self.sprites["personagem_atirando"].get_height()*5)),
             "parado": pygame.transform.scale(self.sprites["personagem_parado"], (self.sprites["personagem_parado"].get_width()*5, self.sprites["personagem_parado"].get_height()*5)),
@@ -95,7 +95,7 @@ class TelaJogo(Tela):
         self.ultima_geracao_corredores = pygame.time.get_ticks()
         # self.cooldown_kitmedico = random.randint(10000, 30000)
         # self.ultima_geracao_kitmedico = pygame.time.get_ticks()
-        self.intervalo_geracao = 4000 # 4000 porque seriam 3000 milisegundos
+        self.intervalo_geracao = 2800 # 4000 porque seriam 3000 milisegundos
         self.cooldown_gameover = 5000
         self.estado = "vivo"
         self.tempo_morte = None  # Marca quando morreu
@@ -231,7 +231,7 @@ class TelaJogo(Tela):
             self.ultima_geracao = agora
             novo_zumbi = Zumbies(self.assets["zombie_walk"], 10, self.tela)
             self.zumbies.add(novo_zumbi)
-        if agora - self.ultima_geracao_corredores > (self.intervalo_geracao + 1000):
+        if agora - self.ultima_geracao_corredores > self.intervalo_geracao:
             self.ultima_geracao_corredores = agora
             corredor = Zumbies_Corredores(self.assets["zombie_walk_corredor"], 8, self.tela)
             self.corredores.add(corredor)
@@ -249,18 +249,19 @@ class TelaJogo(Tela):
 
         colisao_zumbi_personagem = pygame.sprite.groupcollide(self.grupo_pesonagem, self.zumbies, False, False)
         for personagem, zumbie in colisao_zumbi_personagem.items():
-            for zumbi in zumbie:
-                if zumbi.estado == 'andando':  # só inicia ataque se ainda estiver andando
-                    zumbi.trocar_animacao(self.assets["zombie_attack"], 5, novo_estado='Ataque')
-                    self.personagem.vidas -= 10
-                    self.zumbi_grunindo.play()
-                    if self.personagem.vidas <= 0 and self.estado != "morto":
-                        self.personagem.vidas = 0
-                        morte = Impacto(self.personagem.image_rect.center, self.assets["personagem_dead"], 4, "Personagem")
-                        self.impactos.add(morte)
-                        self.grupo_pesonagem.remove(self.personagem)
-                        self.estado = "morto"
-                        self.tempo_morte = pygame.time.get_ticks()
+                    for zumbi in zumbie:
+                        if zumbi.estado == 'andando':  # só inicia ataque se ainda estiver andando
+                            if zumbi.rect.centery == self.personagem.rect.centery:
+                                zumbi.trocar_animacao(self.assets["zombie_attack"], 5, novo_estado='Ataque')
+                                self.personagem.vidas -= 10
+                                self.zumbi_grunindo.play()
+                                if self.personagem.vidas <= 0 and self.estado != "morto":
+                                    self.personagem.vidas = 0
+                                    morte = Impacto(self.personagem.image_rect.center, self.assets["personagem_dead"], 4, "Personagem")
+                                    self.impactos.add(morte)
+                                    self.grupo_pesonagem.remove(self.personagem)
+                                    self.estado = "morto"
+                                    self.tempo_morte = pygame.time.get_ticks()
 
         colisoes_ameaca = pygame.sprite.spritecollide(self.personagem, self.ameacas, False)
         for ameaca in colisoes_ameaca:
@@ -352,9 +353,9 @@ class TelaJogo(Tela):
         # Verificar movimento horizontal
         if self.moving_left or self.moving_right:
             if self.moving_left and self.personagem.rect.x - self.personagem.rect.width >= 0:
-                self.personagem.mover(30, 0)
+                self.personagem.mover(40, 0)
             if self.moving_right and self.personagem.rect.x + self.personagem.rect.width < self.tela["largura"]:
-                self.personagem.mover(-30, 0)
+                self.personagem.mover(-40, 0)
 
         # Verificar movimento vertical
         if self.moving_up or self.moving_down:
@@ -387,7 +388,6 @@ class TelaJogo(Tela):
         mira_rect = self.mira.get_rect(center=(mouse_x, mouse_y))
         janela.blit(self.mira, mira_rect)
         for zumbi in self.zumbies:
-            pygame.draw.rect(janela,(0,255,0),zumbi.rect)
             zumbi.desenha(janela)
         for corredores in self.corredores:
             # pygame.draw.rect(janela,(0,255,0),corredores.rect)

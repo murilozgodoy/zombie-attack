@@ -42,7 +42,7 @@ class Zumbies(pygame.sprite.Sprite):
         self.image_rect.midbottom = self.rect.midbottom
 
         self.vidas = 2
-        self.velocidade = 13
+        self.velocidade = 20
 
     def carregar_frames(self, imagem, frames):
         imagem = imagem.convert_alpha()
@@ -144,7 +144,7 @@ class Zumbies_Corredores(pygame.sprite.Sprite):
 
         self.image = self.frames[0]
         self.vidas = 2
-        self.velocidade = 30
+        self.velocidade = 40
 
     def carregar_frames(self, image, frames):
         image = image.convert_alpha()
@@ -188,7 +188,7 @@ class Zumbies_Corredores(pygame.sprite.Sprite):
 
     def desenha(self, janela):
         janela.blit(self.image, self.image_rect)
-        pygame.draw.rect(janela, (255, 0, 0), self.rect, 2)
+
 
 
 
