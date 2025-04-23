@@ -362,7 +362,7 @@ class TelaJogo(Tela):
         self.zumbies.update()
         for zumbie in self.zumbies:
             if zumbie.rect.x < -150:
-                if self.estado_geral == "normal":
+                if self.estado_geral == "normal"and self.estado == "vivo":
                     self.sirene.play()
                     self.sirene.set_volume(0.5)
                     self.acionamento = pygame.time.get_ticks()
@@ -370,7 +370,7 @@ class TelaJogo(Tela):
         self.corredores.update()
         for corredores in self.corredores:
             if corredores.rect.x < -150:
-                if self.estado_geral == "normal":
+                if self.estado_geral == "normal" and self.estado == "vivo":
                     self.sirene.play()
                     self.sirene.set_volume(0.5)
                     self.acionamento = pygame.time.get_ticks()
@@ -398,7 +398,8 @@ class TelaJogo(Tela):
                 self.personagem.mover(0, -30)
             if self.moving_down and  self.personagem.rect.y + self.personagem.rect.height < self.tela["altura"]:
                 self.personagem.mover(0, 30)
-
+        if self.personagem.vidas < 0:
+            self.personagem.vidas = 0
     def desenha(self, janela):
         janela.fill((0, 0, 0))
         janela.blit(self.assets["img_fundo"], (0, 0))
@@ -410,6 +411,7 @@ class TelaJogo(Tela):
         # janela.blit(self.kit_medico.image, self.kit_medico.rect)
         # pygame.draw.rect(janela, (255, 0, 0), self.kit_medico.rect, 2)  # Desenha a hitbox para depuração
         janela.blit(self.assets["placa"], (self.tela["largura"] - 1600, 400))
+        
         vida = self.assets["fonte"].render(f'   {self.personagem.vidas}', True, (255, 0,0))
         vida = pygame.transform.scale(vida, (150, 30))
         janela.blit(vida, ((self.tela["largura"]- 150), 30))
