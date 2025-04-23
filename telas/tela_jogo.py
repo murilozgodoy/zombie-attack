@@ -276,11 +276,7 @@ class TelaJogo(Tela):
             if ameaca.rect.bottom <= self.personagem.rect.centery:
                 if self.estado != "morto":
                     self.personagem.vidas -= 15
-                    if self.animacao_tiro:
-                        self.tiro_sound.stop()
-                        self.explosao.play()
-                    else:
-                        self.explosao.play()
+                    self.explosao.play()
 
                     offset_x = 0
                     offset_y = 37 
