@@ -274,25 +274,30 @@ class TelaJogo(Tela):
         colisoes_ameaca = pygame.sprite.spritecollide(self.personagem, self.ameacas, False)
         for ameaca in colisoes_ameaca:
             if ameaca.rect.bottom <= self.personagem.rect.centery:
-                self.personagem.vidas -= 15
-                self.explosao.play()
-    
-                offset_x = 0
-                offset_y = 37 
-                explosao_pos = (ameaca.rect.centerx + offset_x, ameaca.rect.centery + offset_y)
+                if self.estado != "morto":
+                    self.personagem.vidas -= 15
+                    if self.animacao_tiro:
+                        self.tiro_sound.stop()
+                        self.explosao.play()
+                    else:
+                        self.explosao.play()
 
-                explosao = ExplosaoAerea(explosao_pos, self.assets["explosao_aerea"], colunas=5, linhas=1, tamanho=(80, 80))
-                self.impactos.add(explosao)
+                    offset_x = 0
+                    offset_y = 37 
+                    explosao_pos = (ameaca.rect.centerx + offset_x, ameaca.rect.centery + offset_y)
 
-                ameaca.kill()
+                    explosao = ExplosaoAerea(explosao_pos, self.assets["explosao_aerea"], colunas=5, linhas=1, tamanho=(80, 80))
+                    self.impactos.add(explosao)
 
-                if self.personagem.vidas <= 0 and self.estado != "morto":
-                    self.personagem.vidas = 0
-                    morte = Impacto(self.personagem.image_rect.center, self.assets["personagem_dead"], 4, "Personagem")
-                    self.impactos.add(morte)
-                    self.grupo_pesonagem.remove(self.personagem)
-                    self.estado = "morto"
-                    self.tempo_morte = pygame.time.get_ticks()
+                    ameaca.kill()
+
+                    if self.personagem.vidas <= 0 and self.estado != "morto":
+                        self.personagem.vidas = 0
+                        morte = Impacto(self.personagem.image_rect.center, self.assets["personagem_dead"], 4, "Personagem")
+                        self.impactos.add(morte)
+                        self.grupo_pesonagem.remove(self.personagem)
+                        self.estado = "morto"
+                        self.tempo_morte = pygame.time.get_ticks()
     
         if self.estado == "morto" and self.tempo_morte is not None:
             agora = pygame.time.get_ticks()
