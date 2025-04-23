@@ -26,4 +26,4 @@ OBS: se estiver no windows, coloque a escala da sua tela em 100%
 
 ## Link para vídeo demostração
 
-[ADICIONE O LINK PARA O VÍDEO DEMOSTRAÇÃO DO JOGO] (* O vídeo deve conter todas as funcionalidades do jogo.)
+https://youtu.be/nURn7oZUbBs
