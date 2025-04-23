@@ -28,6 +28,10 @@ class TelaJogo(Tela):
         self.ultimo_spawn_ameaca = pygame.time.get_ticks()
         self.intervalo_ameaca = random.randint(1000, 3000)
         self.corredores = pygame.sprite.Group()
+        if not pygame.mixer.get_busy():
+                self.som_ambiente = pygame.mixer.Sound("assets/snd/som_ambiente.wav")
+                self.som_ambiente.set_volume(0.1)
+                self.som_ambiente.play(-1)
         self.recarregar_sound = pygame.mixer.Sound("assets/snd/recarregar.wav")
         self.zumbi_grunindo = pygame.mixer.Sound("assets/snd/zumbiegrunindo.wav")
         self.sirene = pygame.mixer.Sound("assets/snd/sirene.wav")
@@ -57,6 +61,7 @@ class TelaJogo(Tela):
         self.assets = {
             "img_fundo": pygame.transform.scale(pygame.image.load("assets/img/Fundo.png"), (self.tela["largura"], self.tela["altura"])),
             "kit_medico": pygame.transform.scale(pygame.image.load("assets/img/kitmedico.png"), (100, 100)),
+            "placa": pygame.transform.scale(pygame.image.load("assets/img/placa.png"), (150, 150)),
             "fonte": pygame.font.Font("assets/font/PressStart2P.ttf", 30),
             "mira": pygame.transform.scale(pygame.image.load("assets/img/mira2.png"), (27, 27)),
             "bala": pygame.transform.scale(pygame.image.load("assets/img/bala.png"), (20, 20)),
@@ -404,7 +409,7 @@ class TelaJogo(Tela):
         # ## Kit medico
         # janela.blit(self.kit_medico.image, self.kit_medico.rect)
         # pygame.draw.rect(janela, (255, 0, 0), self.kit_medico.rect, 2)  # Desenha a hitbox para depuração
-        
+        janela.blit(self.assets["placa"], (self.tela["largura"] - 1600, 400))
         vida = self.assets["fonte"].render(f'   {self.personagem.vidas}', True, (255, 0,0))
         vida = pygame.transform.scale(vida, (150, 30))
         janela.blit(vida, ((self.tela["largura"]- 150), 30))

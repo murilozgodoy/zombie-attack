@@ -10,9 +10,10 @@ class TelaInicial(Tela):
         self.jogo = jogo
         self.tela = tela
         self.fonte = pygame.font.Font("assets/font/PressStart2P.ttf", 30)
-        self.som_ambiente = pygame.mixer.Sound("assets/snd/som_ambiente.wav")
-        self.som_ambiente.set_volume(0.1)
-        self.som_ambiente.play(-1)
+        if not pygame.mixer.get_busy():
+            self.som_ambiente = pygame.mixer.Sound("assets/snd/som_ambiente.wav")
+            self.som_ambiente.set_volume(0.1)
+            self.som_ambiente.play(-1)
         self.image = pygame.transform.scale(
             pygame.image.load("assets/img/Inicial.png"),
             (tela["largura"], tela["altura"])            
