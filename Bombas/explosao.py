@@ -1,7 +1,7 @@
 import pygame
 
 class ExplosaoAerea(pygame.sprite.Sprite):
-    def __init__(self, center, spritesheet, colunas, linhas, tamanho=(80, 80)):
+    def __init__(self, center, spritesheet, colunas, linhas, tamanho=(80, 120)):
         super().__init__()
         self.frames = self.carregar_frames(spritesheet, colunas, linhas, tamanho)
         self.frame_atual = 0
