@@ -7,7 +7,7 @@ class TelaGameOver(Tela):
         self.tela = tela
         pygame.mixer.quit()
         self.image = pygame.transform.scale(
-            pygame.image.load("assets/img/gameover.png"),
+            pygame.image.load("assets/img/gameover1.png"),
             (tela["largura"], tela["altura"])        
         )
     def trata_eventos(self, eventos):

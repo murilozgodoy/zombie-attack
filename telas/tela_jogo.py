@@ -109,7 +109,7 @@ class TelaJogo(Tela):
         # self.cooldown_kitmedico = random.randint(10000, 30000)
         # self.ultima_geracao_kitmedico = pygame.time.get_ticks()
         self.intervalo_geracao = 2800 # 4000 porque seriam 3000 milisegundos
-        self.cooldown_gameover = 5000
+        self.cooldown_gameover = 3000
         self.estado = "vivo"
         self.tempo_morte = None  # Marca quando morreu
         self.personagem_recarregando = False
