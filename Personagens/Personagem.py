@@ -8,7 +8,7 @@ class Personagens(pygame.sprite.Sprite):
         self.tempo_ultimo_update = pygame.time.get_ticks()
         self.intervalo_animacao = 100
         self.tela = tela
-        self.municoes_totais = 120
+        self.municoes_totais = 210
         self.municoes = 30
         self.zumbies_mortos = 0
         largura_frame = 112 * 5

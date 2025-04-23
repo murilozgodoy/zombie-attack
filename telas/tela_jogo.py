@@ -57,6 +57,8 @@ class TelaJogo(Tela):
             "zumbi_morte_corredor":pygame.image.load("assets/img/ZombieMan/Dead.png"),
             "kit_medico":pygame.image.load("assets/img/kitmedico.png"),
             "corredor_ferido":pygame.image.load("assets/img/ZombieMan/Hurt.png"),
+            "municoes":pygame.image.load("assets/img/municoes.png"),
+            "vida" :pygame.image.load("assets/img/vida.png"),
         }
         self.assets = {
             "img_fundo": pygame.transform.scale(pygame.image.load("assets/img/Fundo.png"), (self.tela["largura"], self.tela["altura"])),
@@ -77,9 +79,11 @@ class TelaJogo(Tela):
             "pesonagem_recarregar": pygame.transform.scale(self.sprites["personagem_recarregar"],(self.sprites["personagem_recarregar"].get_width()*5,self.sprites["personagem_recarregar"].get_height()*5)),
             "explosao_aerea": pygame.image.load("assets/img/explodindo.png"),
             "bomba_aerea": pygame.transform.scale(pygame.image.load("assets/img/boma_aerea.png").convert_alpha(), (80, 75)),
-            "zombie_walk_corredor": pygame.transform.scale(self.sprites["zumbi_andar_corredor"], (self.sprites["zumbi_andar_corredor"].get_width()*4.5, self.sprites["zumbi_andar_corredor"].get_height()*4.5)),
-            "zumbi_morte_corredor": pygame.transform.scale(self.sprites["zumbi_morte_corredor"], (self.sprites["zumbi_morte_corredor"].get_width()*4.5, self.sprites["zumbi_morte_corredor"].get_height()*4.5)),
-            "corredor_ferido": pygame.transform.scale(self.sprites["corredor_ferido"], (self.sprites["corredor_ferido"].get_width()*4.5, self.sprites["corredor_ferido"].get_height()*4.5)),
+            "zombie_walk_corredor": pygame.transform.scale(self.sprites["zumbi_andar_corredor"], (self.sprites["zumbi_andar_corredor"].get_width()*5, self.sprites["zumbi_andar_corredor"].get_height()*5)),
+            "zumbi_morte_corredor": pygame.transform.scale(self.sprites["zumbi_morte_corredor"], (self.sprites["zumbi_morte_corredor"].get_width()*5, self.sprites["zumbi_morte_corredor"].get_height()*5)),
+            "corredor_ferido": pygame.transform.scale(self.sprites["corredor_ferido"], (self.sprites["corredor_ferido"].get_width()*5, self.sprites["corredor_ferido"].get_height()*5)),
+            "municoes": pygame.transform.scale(self.sprites["municoes"], (70, 70)),
+            "vida": pygame.transform.scale(self.sprites["vida"], (50, 50)),
         }
         self.personagem = Personagens(self.assets['parado'], 7,self.tela)
         self.grupo_pesonagem = pygame.sprite.GroupSingle(self.personagem)
@@ -98,7 +102,7 @@ class TelaJogo(Tela):
         self.animacao_tiro = False
         self.animacao_repetir = False
 
-        self.cronometro = Cronometro(1, self.assets["fonte"])
+        self.cronometro = Cronometro(2, self.assets["fonte"])
 
         self.ultima_geracao = pygame.time.get_ticks()
         self.ultima_geracao_corredores = pygame.time.get_ticks()
@@ -412,14 +416,22 @@ class TelaJogo(Tela):
         # pygame.draw.rect(janela, (255, 0, 0), self.kit_medico.rect, 2)  # Desenha a hitbox para depuração
         janela.blit(self.assets["placa"], (self.tela["largura"] - 1600, 400))
         
+
+
+        
         vida = self.assets["fonte"].render(f'   {self.personagem.vidas}', True, (255, 0,0))
         vida = pygame.transform.scale(vida, (150, 30))
+        janela.blit(self.assets["vida"], (self.tela["largura"] - 120, 17))
         janela.blit(vida, ((self.tela["largura"]- 150), 30))
+
+
+
         self.cronometro.desenha(janela, (self.tela["largura"] // 2) - 50, 10)  # Desenha o cronômetro no canto superior esquerdo
         
         municao = self.assets["fonte"].render(f'  {self.personagem.municoes}/{self.personagem.municoes_totais}', True, (255,255,255))
         municao = pygame.transform.scale(municao, (150, 30))
         janela.blit(municao, ((self.tela["largura"]- 150), 80))
+        janela.blit(self.assets["municoes"], (self.tela["largura"] - 190, 55))
 
         mouse_x, mouse_y = pygame.mouse.get_pos()
         mira_rect = self.mira.get_rect(center=(mouse_x, mouse_y))
