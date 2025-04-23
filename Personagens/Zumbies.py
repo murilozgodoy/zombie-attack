@@ -189,30 +189,3 @@ class Zumbies_Corredores(pygame.sprite.Sprite):
     def desenha(self, janela):
         janela.blit(self.image, self.image_rect)
 
-
-
-
-# ##   agora = pygame.time.get_ticks()
-#         delta_time = (agora - self.tempo_ultimo_update) / 1000
-#         if agora - self.tempo_ultimo_update > self.intervalo_animacao:
-#             self.tempo_ultimo_update = agora
-#             self.frame_atual += 1
-#             if self.frame_atual >= len(self.frames):
-#                 if self.animacao_dano:
-#                     self.trocar_animacao(self.walk, 10)
-#                     self.estado = 'andando'
-#                     self.animacao_dano = False
-#                 elif self.estado == "Ataque":
-#                     self.trocar_animacao(self.walk,5)
-#                     # self.rect.x -= 20 * delta_time
-#                     # self.image_rect.midbottom = self.rect.midbottom
-#                     self.estado = "andando"
-#                 else:
-#                     self.frame_atual = 0
-#             self.image = self.frames[self.frame_atual]
-            
-#         if self.estado == 'andando':
-#             self.rect.x -= self.velocidade * delta_time
-#             self.image_rect.midbottom = self.rect.midbottom  # mantém sprite sempre alinhado com a hitbox
-#             if self.rect.x < -200:
-#                 self.kill()

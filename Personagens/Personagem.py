@@ -56,9 +56,6 @@ class Personagens(pygame.sprite.Sprite):
             self.tempo_ultimo_update = agora
             self.frame_atual = (self.frame_atual + 1) % len(self.frames)
             self.image = self.frames[self.frame_atual]
-            # if self.frame_atual >= len(self.frames):
-                # if 
-                # self.trocar_animacao(self.walk,5)
 
     def mover(self, velocidadex, velocidadey):
         agora = pygame.time.get_ticks()
