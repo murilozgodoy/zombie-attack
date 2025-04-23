@@ -4,7 +4,7 @@ from .tela_nome import TelaNome
 from .tela_instrucoes import TelaInstrucoes
 
 class TelaInicial(Tela):
-    def __init__(self, jogo, tela):
+    def _init_(self, jogo, tela):
         self.jogo = jogo
         self.tela = tela
         self.fonte = pygame.font.Font("assets/font/PressStart2P.ttf", 30)
@@ -13,14 +13,14 @@ class TelaInicial(Tela):
             (tela["largura"], tela["altura"])            
         )
         self.botao_jogar_rect = pygame.Rect(
-            (tela["largura"] - 640) // 2,
-            (tela["altura"] - 175) // 2,
-            570, 160
+            (tela["largura"] - 643) // 2,
+            (tela["altura"] - 184) // 2,
+            575, 170
         )
         self.botao_instrucoes_rect = pygame.Rect(
-            (tela["largura"] - 640) // 2,
-            (tela["altura"] + 235) // 2,
-            570, 160
+            (tela["largura"] - 643) // 2,
+            (tela["altura"] + 229) // 2,
+            575, 170
         )
 
     def trata_eventos(self, eventos):
@@ -34,7 +34,12 @@ class TelaInicial(Tela):
 
     def desenha(self, janela):
         janela.fill((0, 0, 0))
-        janela.blit(self.image, (0, 0))   
-        pygame.draw.rect(janela, (255, 255, 255), self.botao_jogar_rect)
-        pygame.draw.rect(janela, (255, 0, 255), self.botao_instrucoes_rect)
+        janela.blit(self.image, (0, 0))  
+        mouse_pos = pygame.mouse.get_pos()
+        if self.botao_jogar_rect.collidepoint(mouse_pos): 
+            pygame.draw.rect(janela, (255, 200, 60) , self.botao_jogar_rect, 10, border_radius=10)
+
+        if self.botao_instrucoes_rect.collidepoint(mouse_pos):
+            pygame.draw.rect(janela, (255, 200, 60) , self.botao_instrucoes_rect,10, border_radius=10)
+
         pygame.display.flip()

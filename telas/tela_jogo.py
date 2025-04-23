@@ -9,6 +9,7 @@ from Bombas.explosao import ExplosaoAerea
 from ranking.ranking import add_score, load_ranking
 from utilidades.cronometro import Cronometro
 from utilidades.FPS import FPS
+# from utilidades.kit_medico import KitMedico
 
 
 
@@ -18,6 +19,7 @@ class TelaJogo(Tela):
         self.jogo = jogo
         # self.zumbies_mortos = 0
         self.tela = tela
+        # self.kit_medico = KitMedico(self.tela)
         self.zumbies = pygame.sprite.Group()
         self.tiros = pygame.sprite.Group()
         self.impactos = pygame.sprite.Group()
@@ -46,9 +48,12 @@ class TelaJogo(Tela):
             "zumbi_ataque":pygame.image.load("assets/img/Zombie_1/Attack.png"),
             "zumbi_andar_corredor":pygame.image.load("assets/img/ZombieMan/Walk.png"),
             "zumbi_morte_corredor":pygame.image.load("assets/img/ZombieMan/Dead.png"),
+            "kit_medico":pygame.image.load("assets/img/kitmedico.png"),
+            "corredor_ferido":pygame.image.load("assets/img/ZombieMan/Hurt.png"),
         }
         self.assets = {
             "img_fundo": pygame.transform.scale(pygame.image.load("assets/img/Fundo.png"), (self.tela["largura"], self.tela["altura"])),
+            "kit_medico": pygame.transform.scale(pygame.image.load("assets/img/kitmedico.png"), (100, 100)),
             "fonte": pygame.font.Font("assets/font/PressStart2P.ttf", 30),
             "mira": pygame.transform.scale(pygame.image.load("assets/img/mira.png"), (27, 27)),
             "bala": pygame.transform.scale(pygame.image.load("assets/img/bala.png"), (20, 20)),
@@ -66,6 +71,7 @@ class TelaJogo(Tela):
             "bomba_aerea": pygame.transform.scale(pygame.image.load("assets/img/boma_aerea.png").convert_alpha(), (80, 75)),
             "zombie_walk_corredor": pygame.transform.scale(self.sprites["zumbi_andar_corredor"], (self.sprites["zumbi_andar_corredor"].get_width()*4.5, self.sprites["zumbi_andar_corredor"].get_height()*4.5)),
             "zumbi_morte_corredor": pygame.transform.scale(self.sprites["zumbi_morte_corredor"], (self.sprites["zumbi_morte_corredor"].get_width()*4.5, self.sprites["zumbi_morte_corredor"].get_height()*4.5)),
+            "corredor_ferido": pygame.transform.scale(self.sprites["corredor_ferido"], (self.sprites["corredor_ferido"].get_width()*4.5, self.sprites["corredor_ferido"].get_height()*4.5)),
         }
         self.personagem = Personagens(self.assets['parado'], 7,self.tela)
         self.grupo_pesonagem = pygame.sprite.GroupSingle(self.personagem)
@@ -88,6 +94,8 @@ class TelaJogo(Tela):
 
         self.ultima_geracao = pygame.time.get_ticks()
         self.ultima_geracao_corredores = pygame.time.get_ticks()
+        # self.cooldown_kitmedico = random.randint(10000, 30000)
+        # self.ultima_geracao_kitmedico = pygame.time.get_ticks()
         self.intervalo_geracao = 4000 # 4000 porque seriam 3000 milisegundos
         self.cooldown_gameover = 5000
         self.estado = "vivo"
@@ -228,6 +236,7 @@ class TelaJogo(Tela):
             self.ultima_geracao_corredores = agora
             corredor = Zumbies_Corredores(self.assets["zombie_walk_corredor"], 8, self.tela)
             self.corredores.add(corredor)
+        
 
 
         agora = pygame.time.get_ticks()
@@ -311,9 +320,9 @@ class TelaJogo(Tela):
                     self.corredores.remove(corredor)
                     self.tiros.remove(tiro)
                     self.personagem.zumbies_mortos += 1
-                # else:
-                #     if corredor.estado != 'ferido':
-                #         corredor.trocar_animacao(self.assets["zumbi_ferido"], 4, dano=True, novo_estado='ferido')
+                else:
+                    if corredor.estado != 'dano':
+                        corredor.trocar_animacao(self.assets["corredor_ferido"], 3, novo_estado='dano')
         # Atualizar as animações do personagem e verificar o término da animação de tiro
         if self.animacao_tiro:
                 if self.personagem.frame_atual == len(self.personagem.frames) - 1:  # Último quadro
@@ -361,7 +370,9 @@ class TelaJogo(Tela):
         texto_fps = self.assets["fonte"].render(f'FPS: {self.fps_monitor.fps:.2f}', True, (255, 255, 255))
         texto_fps = pygame.transform.scale(texto_fps, (150, 30))
         janela.blit(texto_fps, ((self.tela["largura"]- 150), (self.tela["altura"] - 30)))
-        
+        # ## Kit medico
+        # janela.blit(self.kit_medico.image, self.kit_medico.rect)
+        # pygame.draw.rect(janela, (255, 0, 0), self.kit_medico.rect, 2)  # Desenha a hitbox para depuração
         
         vida = self.assets["fonte"].render(f'   {self.personagem.vidas}', True, (255, 0,0))
         vida = pygame.transform.scale(vida, (150, 30))
