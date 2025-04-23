@@ -186,7 +186,7 @@ class TelaJogo(Tela):
                     self.usuario["municoes"] = self.personagem.municoes
                     self.usuario["municoes_totais"] = self.personagem.municoes_totais
                     self.usuario["zumbies_mortos"] = self.personagem.zumbies_mortos
-                    tiros_disparados = 150 - (self.personagem.municoes_totais + self.personagem.municoes)
+                    tiros_disparados = 240 - (self.personagem.municoes_totais + self.personagem.municoes)
                     if self.zumbies_atingidos == 0:
                         self.usuario["acertos"] = 0
                     else:
@@ -232,7 +232,7 @@ class TelaJogo(Tela):
                 self.usuario["municoes"] = self.personagem.municoes
                 self.usuario["municoes_totais"] = self.personagem.municoes_totais
                 self.usuario["zumbies_mortos"] = self.personagem.zumbies_mortos
-                tiros_disparados = 150 - (self.personagem.municoes_totais + self.personagem.municoes)
+                tiros_disparados = 240 - (self.personagem.municoes_totais + self.personagem.municoes)
                 if self.zumbies_atingidos == 0:
                     self.usuario["acertos"] = 0
                 else:
