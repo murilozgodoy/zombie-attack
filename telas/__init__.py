@@ -5,3 +5,4 @@ from telas.tela_instrucoes import TelaInstrucoes
 from telas.tela_gameover import TelaGameOver
 from telas.tela_vitoria import TelaVitoria
 from telas.tela_jogo import TelaJogo
+from telas.tela_gameover02 import TelaGameOver02

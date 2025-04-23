@@ -30,6 +30,9 @@ class TelaJogo(Tela):
         self.corredores = pygame.sprite.Group()
         self.recarregar_sound = pygame.mixer.Sound("assets/snd/recarregar.wav")
         self.zumbi_grunindo = pygame.mixer.Sound("assets/snd/zumbiegrunindo.wav")
+        self.sirene = pygame.mixer.Sound("assets/snd/sirene.wav")
+        self.duracao = self.sirene.get_length()
+        print(self.duracao)
         self.zumbi_grunindo.set_volume(0.5)
         # self.arma_vazia = pygame.mixer.Sound("assets/snd/sem_municao.wav")
         # self.arma_vazia.set_volume(1.0)
@@ -102,7 +105,7 @@ class TelaJogo(Tela):
         self.tempo_morte = None  # Marca quando morreu
         self.personagem_recarregando = False
         self.zumbies_atingidos = 0
-
+        self.estado_geral = "normal"
 
         self.usuario = {
             "vida": self.personagem.vidas,
@@ -352,10 +355,29 @@ class TelaJogo(Tela):
                 self.personagem_recarregando = False
                 self.personagem.trocar_animacao(self.assets["parado"], 7)
         self.zumbies.update()
+        for zumbie in self.zumbies:
+            if zumbie.rect.x < -150:
+                if self.estado_geral == "normal":
+                    self.sirene.play()
+                    self.sirene.set_volume(0.5)
+                    self.acionamento = pygame.time.get_ticks()
+                    self.estado_geral = "invasao"
+        self.corredores.update()
+        for corredores in self.corredores:
+            if corredores.rect.x < -150:
+                if self.estado_geral == "normal":
+                    self.sirene.play()
+                    self.sirene.set_volume(0.5)
+                    self.acionamento = pygame.time.get_ticks()
+                    self.estado_geral = "invasao"
+        if self.estado_geral == "invasao" and self.acionamento is not None:
+            agora = pygame.time.get_ticks()
+            if agora - self.acionamento >= self.duracao*1000:
+                from telas import TelaGameOver02
+                self.jogo.trocar_tela(TelaGameOver02(self.jogo, self.tela))
         self.tiros.update()
         self.impactos.update()
         self.ameacas.update()
-        self.corredores.update()
         
 
         # Verificar movimento horizontal
