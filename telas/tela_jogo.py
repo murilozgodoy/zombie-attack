@@ -36,7 +36,7 @@ class TelaJogo(Tela):
         self.zumbi_grunindo = pygame.mixer.Sound("assets/snd/zumbiegrunindo.wav")
         self.sirene = pygame.mixer.Sound("assets/snd/sirene.wav")
         self.duracao = self.sirene.get_length()
-        print(self.duracao)
+        self.explosao = pygame.mixer.Sound("assets/snd/explosao.wav")
         self.zumbi_grunindo.set_volume(0.5)
         # self.arma_vazia = pygame.mixer.Sound("assets/snd/sem_municao.wav")
         # self.arma_vazia.set_volume(1.0)
@@ -283,7 +283,7 @@ class TelaJogo(Tela):
         for ameaca in colisoes_ameaca:
             if ameaca.rect.bottom <= self.personagem.rect.centery:
                 self.personagem.vidas -= 15
-
+                self.explosao.play()
     
                 offset_x = 0
                 offset_y = 37 
