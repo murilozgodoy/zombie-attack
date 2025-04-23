@@ -5,6 +5,8 @@ from .tela_instrucoes import TelaInstrucoes
 
 class TelaInicial(Tela):
     def __init__(self, jogo, tela):
+        pygame.mixer.init()
+        pygame.mouse.set_visible(True)
         self.jogo = jogo
         self.tela = tela
         self.fonte = pygame.font.Font("assets/font/PressStart2P.ttf", 30)
