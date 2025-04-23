@@ -2,7 +2,7 @@ import pygame
 from .tela import Tela
 from .tela_nome import TelaNome
 from .tela_instrucoes import TelaInstrucoes
-
+##
 class TelaInicial(Tela):
     def __init__(self, jogo, tela):
         pygame.mixer.init()
