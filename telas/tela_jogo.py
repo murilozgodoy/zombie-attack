@@ -28,10 +28,12 @@ class TelaJogo(Tela):
         self.intervalo_ameaca = random.randint(1000, 3000)
         self.corredores = pygame.sprite.Group()
         self.recarregar_sound = pygame.mixer.Sound("assets/snd/recarregar.wav")
+        self.zumbi_grunindo = pygame.mixer.Sound("assets/snd/zumbiegrunindo.wav")
+        self.zumbi_grunindo.set_volume(0.5)
         # self.arma_vazia = pygame.mixer.Sound("assets/snd/sem_municao.wav")
         # self.arma_vazia.set_volume(1.0)
         self.tiro_sound = pygame.mixer.Sound("assets/snd/som_tiro.wav")
-        self.tiro_sound.set_volume(0.07)
+        self.tiro_sound.set_volume(0.1)
         self.som_ambiente = pygame.mixer.Sound("assets/snd/som_ambiente.wav")
         self.som_ambiente.set_volume(0.1)
         self.som_ambiente.play(-1)
@@ -254,7 +256,7 @@ class TelaJogo(Tela):
                 if zumbi.estado == 'andando':  # só inicia ataque se ainda estiver andando
                     zumbi.trocar_animacao(self.assets["zombie_attack"], 5, novo_estado='Ataque')
                     self.personagem.vidas -= 10
-
+                    self.zumbi_grunindo.play()
                     if self.personagem.vidas <= 0 and self.estado != "morto":
                         self.personagem.vidas = 0
                         morte = Impacto(self.personagem.image_rect.center, self.assets["personagem_dead"], 4, "Personagem")
@@ -297,7 +299,7 @@ class TelaJogo(Tela):
             for zumbi in zumbis_atingidos:
                 zumbi.vidas -= 1
                 self.zumbies_atingidos += 1
-
+                self.zumbi_grunindo.play()
                 if zumbi.vidas <= 0:
                     impacto = Impacto(zumbi.image_rect.center, self.assets["zumbi_morto"], 5, "zumbi")
                     self.impactos.add(impacto)
@@ -314,6 +316,7 @@ class TelaJogo(Tela):
             for corredor in corredores_atingidos:
                 corredor.vidas -= 1
                 self.zumbies_atingidos += 1
+                self.zumbi_grunindo.play()
                 if corredor.vidas <= 0:
                     impacto = Impacto(corredor.image_rect.center,self.assets["zumbi_morte_corredor"],5,"zumbi")
                     self.impactos.add(impacto) 
