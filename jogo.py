@@ -9,7 +9,7 @@ class Jogo:
             "largura": info.current_w,
             "altura": info.current_h,
         }
-        self.janela = pygame.display.set_mode((tela["largura"], tela["altura"]))
+        self.janela = pygame.display.set_mode((tela["largura"], tela["altura"]),pygame.FULLSCREEN)
         pygame.display.set_caption("Zombie Attack")
         self.tela_atual = TelaInicial(self, tela)
 

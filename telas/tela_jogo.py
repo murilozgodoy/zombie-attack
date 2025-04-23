@@ -181,18 +181,6 @@ class TelaJogo(Tela):
                         self.recarregar_sound.play()
                         self.personagem_recarregando = True
                 # Teste para tela de vitoria 
-                if evento.key == pygame.K_t:
-                    self.usuario["vida"] = self.personagem.vidas
-                    self.usuario["municoes"] = self.personagem.municoes
-                    self.usuario["municoes_totais"] = self.personagem.municoes_totais
-                    self.usuario["zumbies_mortos"] = self.personagem.zumbies_mortos
-                    tiros_disparados = 240 - (self.personagem.municoes_totais + self.personagem.municoes)
-                    if self.zumbies_atingidos == 0:
-                        self.usuario["acertos"] = 0
-                    else:
-                        self.usuario["acertos"] = (self.zumbies_atingidos/tiros_disparados) *100 if tiros_disparados > 0 else 0
-                    from telas import TelaVitoria
-                    self.jogo.trocar_tela(TelaVitoria(self.jogo,self.tela,self.usuario))
                 if evento.key == pygame.K_a:  
                     self.moving_left = True
                     self.moving_right = False
