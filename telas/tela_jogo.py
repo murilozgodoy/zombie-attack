@@ -116,6 +116,8 @@ class TelaJogo(Tela):
         self.tempo_morte = None  # Marca quando morreu
         self.personagem_recarregando = False
         self.zumbies_atingidos = 0
+        self.headshots = 0  # Contador de headshots
+        self.ultimo_headshot_tempo = 0  # Para feedback visual temporário
         self.estado_geral = "normal"
         self.acionamento = None  # Inicializa variável para invasão
 
@@ -125,6 +127,7 @@ class TelaJogo(Tela):
             "municoes_totais": self.personagem.municoes_totais,
             "zumbies_mortos": self.personagem.zumbies_mortos,
             "acertos": 0,
+            "headshots": 0,
 
         }
     def trata_eventos(self, eventos):
@@ -215,6 +218,7 @@ class TelaJogo(Tela):
                 self.usuario["municoes"] = self.personagem.municoes
                 self.usuario["municoes_totais"] = self.personagem.municoes_totais
                 self.usuario["zumbies_mortos"] = self.personagem.zumbies_mortos
+                self.usuario["headshots"] = self.headshots
                 tiros_disparados = 240 - (self.personagem.municoes_totais + self.personagem.municoes)
                 if self.zumbies_atingidos == 0:
                     self.usuario["acertos"] = 0
@@ -310,34 +314,72 @@ class TelaJogo(Tela):
         colisao_tiro_zumbi = pygame.sprite.groupcollide(self.tiros, self.zumbies, True, False)
         for tiro, zumbis_atingidos in colisao_tiro_zumbi.items():
             for zumbi in zumbis_atingidos:
-                zumbi.vidas -= 1
+                # Verifica se foi headshot (região superior do zumbi - aproximadamente 30% do topo)
+                tiro_y = tiro.rect.centery
+                zumbi_top = zumbi.rect.top
+                zumbi_bottom = zumbi.rect.bottom
+                regiao_cabeca = zumbi_top + (zumbi_bottom - zumbi_top) * 0.3  # 30% superior é a cabeça
+                
+                is_headshot = tiro_y < regiao_cabeca
+                
                 self.zumbies_atingidos += 1
                 self.zumbi_grunindo.play()
-                if zumbi.vidas <= 0:
+                
+                if is_headshot:
+                    # Headshot mata instantaneamente
+                    self.headshots += 1
+                    self.ultimo_headshot_tempo = pygame.time.get_ticks()  # Para feedback visual
                     impacto = Impacto(zumbi.image_rect.center, self.assets["zumbi_morto"], 5, "zumbi")
                     self.impactos.add(impacto)
-                    zumbi.kill()  # Usa kill() em vez de remove() para melhor gerenciamento
+                    zumbi.kill()
                     self.personagem.zumbies_mortos += 1
                 else:
-                    if zumbi.estado != 'dano':
-                        zumbi.trocar_animacao(self.assets["zumbi_ferido"], 4, dano=True, novo_estado='dano')
+                    # Tiro normal
+                    zumbi.vidas -= 1
+                    if zumbi.vidas <= 0:
+                        impacto = Impacto(zumbi.image_rect.center, self.assets["zumbi_morto"], 5, "zumbi")
+                        self.impactos.add(impacto)
+                        zumbi.kill()
+                        self.personagem.zumbies_mortos += 1
+                    else:
+                        if zumbi.estado != 'dano':
+                            zumbi.trocar_animacao(self.assets["zumbi_ferido"], 4, dano=True, novo_estado='dano')
 
 
         # Colisão tiro-corredor (o tiro é removido automaticamente pelo groupcollide)
         colisao_tiro_corredor = pygame.sprite.groupcollide(self.tiros, self.corredores, True, False)
         for tiro, corredores_atingidos in colisao_tiro_corredor.items():    
             for corredor in corredores_atingidos:
-                corredor.vidas -= 1
+                # Verifica se foi headshot (região superior do corredor - aproximadamente 30% do topo)
+                tiro_y = tiro.rect.centery
+                corredor_top = corredor.rect.top
+                corredor_bottom = corredor.rect.bottom
+                regiao_cabeca = corredor_top + (corredor_bottom - corredor_top) * 0.3  # 30% superior é a cabeça
+                
+                is_headshot = tiro_y < regiao_cabeca
+                
                 self.zumbies_atingidos += 1
                 self.zumbi_grunindo.play()
-                if corredor.vidas <= 0:
+                
+                if is_headshot:
+                    # Headshot mata instantaneamente
+                    self.headshots += 1
+                    self.ultimo_headshot_tempo = pygame.time.get_ticks()  # Para feedback visual
                     impacto = Impacto(corredor.image_rect.center, self.assets["zumbi_morte_corredor"], 5, "zumbi")
                     self.impactos.add(impacto) 
-                    corredor.kill()  # Usa kill() em vez de remove() para melhor gerenciamento
+                    corredor.kill()
                     self.personagem.zumbies_mortos += 1
                 else:
-                    if corredor.estado != 'dano':
-                        corredor.trocar_animacao(self.assets["corredor_ferido"], 3, novo_estado='dano')
+                    # Tiro normal
+                    corredor.vidas -= 1
+                    if corredor.vidas <= 0:
+                        impacto = Impacto(corredor.image_rect.center, self.assets["zumbi_morte_corredor"], 5, "zumbi")
+                        self.impactos.add(impacto) 
+                        corredor.kill()
+                        self.personagem.zumbies_mortos += 1
+                    else:
+                        if corredor.estado != 'dano':
+                            corredor.trocar_animacao(self.assets["corredor_ferido"], 3, novo_estado='dano')
         # Atualizar as animações do personagem e verificar o término da animação de tiro
         if self.animacao_tiro:
                 if self.personagem.frame_atual == len(self.personagem.frames) - 1:  # Último quadro
@@ -442,6 +484,21 @@ class TelaJogo(Tela):
 
         # Cronômetro - centro superior
         self.cronometro.desenha(janela, (self.tela["largura"] // 2) - self.escala.escalar(50), self.escala.escalar(10))
+        
+        # Feedback visual de headshot (aparece por 1 segundo)
+        agora = pygame.time.get_ticks()
+        if agora - self.ultimo_headshot_tempo < 1000:  # Mostra por 1 segundo
+            fonte_headshot = pygame.font.Font("assets/font/PressStart2P.ttf", self.escala.escalar(36))
+            texto_headshot = fonte_headshot.render("HEADSHOT!", True, (255, 215, 0))
+            headshot_x = (self.tela["largura"] - texto_headshot.get_width()) // 2
+            headshot_y = self.escala.escalar(100)
+            # Fundo semi-transparente
+            fundo_headshot = pygame.Surface((texto_headshot.get_width() + self.escala.escalar(20), 
+                                            texto_headshot.get_height() + self.escala.escalar(10)))
+            fundo_headshot.set_alpha(220)
+            fundo_headshot.fill((0, 0, 0))
+            janela.blit(fundo_headshot, (headshot_x - self.escala.escalar(10), headshot_y - self.escala.escalar(5)))
+            janela.blit(texto_headshot, (headshot_x, headshot_y))
         
         # Mensagem de munições vazias no topo da tela
         if self.personagem.municoes == 0 and self.personagem.municoes_totais == 0:

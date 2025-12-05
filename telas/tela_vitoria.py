@@ -19,7 +19,8 @@ class TelaVitoria(Tela):
         # --- registra no ranking e obtém lista atualizada ---
         # use self.jogo.player_name como nome do jogador
         # Corrigido: cálculo de pontos (acertos é porcentagem, não precisa dividir por 100)
-        pontos = (usuario["zumbies_mortos"] * 2) + usuario["vida"] + (usuario["acertos"] * 2)
+        # Headshots dão bônus de pontos
+        pontos = (usuario["zumbies_mortos"] * 2) + usuario["vida"] + (usuario["acertos"] * 2) + (usuario.get("headshots", 0) * 5)
         self.ranking = add_score(self.jogo.player_name, pontos)
 
         # pré-render de estatísticas (removida duplicação)
@@ -35,6 +36,10 @@ class TelaVitoria(Tela):
 
         self.acertos = self.fonte.render(f'% de Acertos: {self.usuario["acertos"]:.2f}', True, (255, 255, 255))
         self.acertos = pygame.transform.scale(self.acertos, (self.escala.escalar(500), self.escala.escalar(100)))
+        
+        # Headshots em cor dourada para destacar
+        self.headshots = self.fonte.render(f'Headshots: {self.usuario.get("headshots", 0)}', True, (255, 215, 0))
+        self.headshots = pygame.transform.scale(self.headshots, (self.escala.escalar(500), self.escala.escalar(100)))
 
     def trata_eventos(self, eventos):
         for evento in eventos:
@@ -50,6 +55,7 @@ class TelaVitoria(Tela):
         janela.blit(self.zumbies_mortos, (self.tela["largura"] - self.escala.escalar(750), self.tela["altura"] - self.escala.escalar(700)))
         janela.blit(self.municoes, (self.tela["largura"] - self.escala.escalar(750), self.tela["altura"] - self.escala.escalar(500)))
         janela.blit(self.acertos, (self.tela["largura"] - self.escala.escalar(750), self.tela["altura"] - self.escala.escalar(300)))
+        janela.blit(self.headshots, (self.tela["largura"] - self.escala.escalar(750), self.tela["altura"] - self.escala.escalar(100)))
         # Exibe o ranking (top 5)
         # emoji_font = pygame.freetype.Font("C:/Windows/Fonts/seguiemj.ttf", 32)
         x_rank, y_rank = self.escala.escalar(100), self.escala.escalar(300)
