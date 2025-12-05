@@ -1,5 +1,6 @@
 import pygame
 from telas import TelaInicial
+from utilidades.escalonamento import Escalonamento
 
 class Jogo:
     def __init__(self):
@@ -11,6 +12,8 @@ class Jogo:
         }
         self.janela = pygame.display.set_mode((tela["largura"], tela["altura"]),pygame.FULLSCREEN)
         pygame.display.set_caption("Zombie Attack")
+        # Cria o sistema de escalonamento
+        self.escalonamento = Escalonamento(tela["largura"], tela["altura"])
         self.tela_atual = TelaInicial(self, tela)
 
     def trocar_tela(self, nova_tela):

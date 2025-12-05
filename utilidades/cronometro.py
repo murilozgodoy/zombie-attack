@@ -9,11 +9,13 @@ class Cronometro:
 
     def atualizar(self):
         agora = pygame.time.get_ticks()
-        self.tempo_restante -= agora - self.tempo_de_inicio
-        self.tempo_de_inicio = agora
-        if self.tempo_restante <= 0:
-            self.tempo_restante = 0
-            self.tempo_acabou = True
+        delta = agora - self.tempo_de_inicio
+        if delta > 0:  # Evita problemas se o jogo pausar
+            self.tempo_restante -= delta
+            self.tempo_de_inicio = agora
+            if self.tempo_restante <= 0:
+                self.tempo_restante = 0
+                self.tempo_acabou = True
 
     def desenha(self, janela, x, y):
         minutos = self.tempo_restante // (60 * 1000)

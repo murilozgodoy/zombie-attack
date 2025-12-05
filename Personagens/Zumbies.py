@@ -1,8 +1,9 @@
 import pygame
 from random import randint
 class Zumbies(pygame.sprite.Sprite):
-    def __init__(self, imagem_andar, frames_andar, tela):
+    def __init__(self, imagem_andar, frames_andar, tela, escala):
         super().__init__()
+        self.escala = escala
         self.animacoes = {
             'andar': (imagem_andar, frames_andar),
             'ataque': None,
@@ -17,11 +18,12 @@ class Zumbies(pygame.sprite.Sprite):
 
         self.carregar_frames(*self.animacoes['andar'])
 
-        largura_frame = 112 * 5
-        altura_frame = 128 * 5
+        largura_frame = escala.escalar(112 * 5)
+        altura_frame = escala.escalar(128 * 5)
 
         # Frame visual
-        y = randint(180,350)
+        y_base = randint(180, 350)
+        y = escala.escalar(y_base)
         self.image_rect = pygame.Rect(
             tela["largura"],
             tela["altura"] - y,
@@ -30,11 +32,11 @@ class Zumbies(pygame.sprite.Sprite):
         )
 
         # Hitbox de colisão
-        hitbox_largura = 150
-        hitbox_altura = 350
+        hitbox_largura = escala.escalar(150)
+        hitbox_altura = escala.escalar(350)
         self.rect = pygame.Rect(
             self.image_rect.centerx - hitbox_largura // 2,
-            tela["altura"] - y*2,
+            tela["altura"] - escala.escalar(y_base * 2),
             hitbox_largura,
             hitbox_altura
         )
@@ -42,7 +44,7 @@ class Zumbies(pygame.sprite.Sprite):
         self.image_rect.midbottom = self.rect.midbottom
 
         self.vidas = 3
-        self.velocidade = 23
+        self.velocidade = escala.escalar(23)
 
     def carregar_frames(self, imagem, frames):
         imagem = imagem.convert_alpha()
@@ -88,7 +90,7 @@ class Zumbies(pygame.sprite.Sprite):
 
         if self.estado == 'andando':
             self.rect.x -= self.velocidade * delta_time
-            if self.rect.x < -200:
+            if self.rect.x < -self.escala.escalar(200):
                 self.kill()
 
         self.image_rect.midbottom = self.rect.midbottom
@@ -98,8 +100,9 @@ class Zumbies(pygame.sprite.Sprite):
 
 
 class Zumbies_Corredores(pygame.sprite.Sprite):
-    def __init__(self, image, frames, tela):
+    def __init__(self, image, frames, tela, escala):
         super().__init__()
+        self.escala = escala
         self.animacoes = {
             "andar": (image, frames),
             "dano": None
@@ -110,41 +113,41 @@ class Zumbies_Corredores(pygame.sprite.Sprite):
         self.intervalo_animacao = 100
         self.estado = 'andando'
         self.animacao_dano = False
-        largura_frame = 112 * 5
-        altura_frame = 128 * 5
+        largura_frame = escala.escalar(112 * 5)
+        altura_frame = escala.escalar(128 * 5)
         y = randint(0,1)
         if y == 0:
             self.image_rect = pygame.Rect(tela["largura"] ,
-                tela["altura"] - 20,
+                tela["altura"] - escala.escalar(20),
                 largura_frame,
-                altura_frame - 190
+                altura_frame - escala.escalar(190)
             )
-            hitbox_largura = 150
-            hitbox_altura = 300
+            hitbox_largura = escala.escalar(150)
+            hitbox_altura = escala.escalar(300)
             self.rect = pygame.Rect(
                 (self.image_rect.centerx - hitbox_largura // 2) ,
-                tela["altura"] - 300,
+                tela["altura"] - escala.escalar(300),
                 hitbox_largura,
                 hitbox_altura
             )
         else:
             self.image_rect = pygame.Rect(tela["largura"] ,
-                tela["altura"] - 20,
+                tela["altura"] - escala.escalar(20),
                 largura_frame,
-                altura_frame - 190
+                altura_frame - escala.escalar(190)
             )
-            hitbox_largura = 150
-            hitbox_altura = 300
+            hitbox_largura = escala.escalar(150)
+            hitbox_altura = escala.escalar(300)
             self.rect = pygame.Rect(
                 (self.image_rect.centerx - hitbox_largura // 2) ,
-                tela["altura"] - 600,
+                tela["altura"] - escala.escalar(600),
                 hitbox_largura,
                 hitbox_altura
             )
 
         self.image = self.frames[0]
         self.vidas = 2
-        self.velocidade = 43
+        self.velocidade = escala.escalar(43)
 
     def carregar_frames(self, image, frames):
         image = image.convert_alpha()
@@ -181,7 +184,7 @@ class Zumbies_Corredores(pygame.sprite.Sprite):
 
         if self.estado == 'andando':
             self.rect.x -= self.velocidade * delta_time
-            if self.rect.x < -200:
+            if self.rect.x < -self.escala.escalar(200):
                 self.kill()
 
         self.image_rect.midbottom = self.rect.midbottom

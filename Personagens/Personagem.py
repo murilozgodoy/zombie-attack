@@ -1,8 +1,9 @@
 import pygame
 
 class Personagens(pygame.sprite.Sprite):
-    def __init__(self, image, frames, tela):
+    def __init__(self, image, frames, tela, escala):
         super().__init__()
+        self.escala = escala
         self.carregar_frames(image, frames)
         self.frame_atual = 0
         self.tempo_ultimo_update = pygame.time.get_ticks()
@@ -11,24 +12,24 @@ class Personagens(pygame.sprite.Sprite):
         self.municoes_totais = 210
         self.municoes = 30
         self.zumbies_mortos = 0
-        largura_frame = 112 * 5
-        altura_frame = 128 * 5
+        largura_frame = escala.escalar(112 * 5)
+        altura_frame = escala.escalar(128 * 5)
 
         # Frame da sprite (imagem visual do personagem)
         self.image_rect = pygame.Rect(
             (tela["largura"] // 2) - largura_frame // 2,
-            tela["altura"] - altura_frame - 50,
+            tela["altura"] - altura_frame - escala.escalar(50),
             largura_frame,
             altura_frame
         )
 
         # Hitbox mais precisa (centralizada na parte do corpo)
-        hitbox_largura = 100
-        hitbox_altura = 350
+        hitbox_largura = escala.escalar(100)
+        hitbox_altura = escala.escalar(350)
 
         # Alinha o centro da hitbox com a parte inferior do personagem (os pés)
         self.rect = pygame.Rect(
-            (self.image_rect.centerx - hitbox_largura // 2)+30,
+            (self.image_rect.centerx - hitbox_largura // 2) + escala.escalar(30),
             self.image_rect.bottom - hitbox_altura,
             hitbox_largura,
             hitbox_altura
@@ -58,12 +59,11 @@ class Personagens(pygame.sprite.Sprite):
             self.image = self.frames[self.frame_atual]
 
     def mover(self, velocidadex, velocidadey):
-        agora = pygame.time.get_ticks()
-        delta_time = (agora - self.tempo_ultimo_update) / 1000
-        self.rect.x -= velocidadex * delta_time
-        self.rect.y += velocidadey * delta_time
+        # Movimento direto em pixels por frame (mais consistente)
+        self.rect.x -= velocidadex
+        self.rect.y += velocidadey
 
-        self.image_rect.x -= velocidadex * delta_time
-        self.image_rect.y += velocidadey * delta_time
+        self.image_rect.x -= velocidadex
+        self.image_rect.y += velocidadey
     def desenha(self, janela):
         janela.blit(self.image, self.image_rect)

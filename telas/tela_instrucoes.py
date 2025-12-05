@@ -7,6 +7,7 @@ class TelaInstrucoes(Tela):
     def __init__(self, jogo, tela):
         self.jogo = jogo
         self.tela = tela
+        self.escala = jogo.escalonamento
         self.image = pygame.transform.scale(
             pygame.image.load("assets/img/fundo.png"),
             (tela["largura"], tela["altura"])        
@@ -23,9 +24,9 @@ class TelaInstrucoes(Tela):
         janela.blit(self.image, (0, 0))
 
    
-        fonte_titulo = pygame.font.SysFont('arialblack', 36)
-        fonte_texto = pygame.font.SysFont('lucidaconsole', 22)
-        fonte_acao = pygame.font.SysFont('lucidaconsole', 22) 
+        fonte_titulo = pygame.font.SysFont('arialblack', self.escala.escalar(36))
+        fonte_texto = pygame.font.SysFont('lucidaconsole', self.escala.escalar(22))
+        fonte_acao = pygame.font.SysFont('lucidaconsole', self.escala.escalar(22)) 
 
         cor_caixa = (30, 30, 30)
         cor_texto = (220, 220, 220)
@@ -53,23 +54,23 @@ class TelaInstrucoes(Tela):
             "DICA: Capriche na mira e evite tomar dano para estar no ranking final de sobreviventes.",
         ]
 
-        largura_caixa = 1520
-        altura_caixa = 600
+        largura_caixa = self.escala.escalar(1520)
+        altura_caixa = self.escala.escalar(600)
         x_caixa = (self.tela["largura"] - largura_caixa) // 2
         y_caixa = (self.tela["altura"] - altura_caixa) // 2
-        pygame.draw.rect(janela, cor_caixa, (x_caixa, y_caixa, largura_caixa, altura_caixa), border_radius=10)
+        pygame.draw.rect(janela, cor_caixa, (x_caixa, y_caixa, largura_caixa, altura_caixa), border_radius=self.escala.escalar(10))
 
 
         titulo = fonte_titulo.render("COMO JOGAR", True, cor_titulo)
-        janela.blit(titulo, (x_caixa + (largura_caixa - titulo.get_width()) // 2, y_caixa + 25))
+        janela.blit(titulo, (x_caixa + (largura_caixa - titulo.get_width()) // 2, y_caixa + self.escala.escalar(25)))
 
-        y_texto = y_caixa + 115
+        y_texto = y_caixa + self.escala.escalar(115)
         for linha in instrucoes:
             texto = fonte_texto.render(linha, True, cor_texto)
             janela.blit(texto, (x_caixa + (largura_caixa - texto.get_width()) // 2, y_texto))
-            y_texto += 40
+            y_texto += self.escala.escalar(40)
 
-        y_texto += 45
+        y_texto += self.escala.escalar(45)
         texto_acao = fonte_acao.render("PRESSIONE 'I' PARA VOLTAR AO INÍCIO!", True, cor_titulo)
         janela.blit(texto_acao, (x_caixa + (largura_caixa - texto_acao.get_width()) // 2, y_texto))
 

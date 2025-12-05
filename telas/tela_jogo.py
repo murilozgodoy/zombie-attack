@@ -19,6 +19,7 @@ class TelaJogo(Tela):
         self.jogo = jogo
         # self.zumbies_mortos = 0
         self.tela = tela
+        self.escala = jogo.escalonamento
         # self.kit_medico = KitMedico(self.tela)
         self.zumbies = pygame.sprite.Group()
         self.tiros = pygame.sprite.Group()
@@ -56,31 +57,36 @@ class TelaJogo(Tela):
             "municoes":pygame.image.load("assets/img/municoes.png"),
             "vida" :pygame.image.load("assets/img/vida.png"),
         }
+        # Calcula tamanho base dos sprites (5x o tamanho original)
+        fator_sprite = 5
+        tamanho_sprite_w = lambda img: self.escala.escalar(img.get_width() * fator_sprite)
+        tamanho_sprite_h = lambda img: self.escala.escalar(img.get_height() * fator_sprite)
+        
         self.assets = {
             "img_fundo": pygame.transform.scale(pygame.image.load("assets/img/Fundo.png"), (self.tela["largura"], self.tela["altura"])),
-            "placa": pygame.transform.scale(pygame.image.load("assets/img/placa.png"), (150, 150)),
-            "fonte": pygame.font.Font("assets/font/PressStart2P.ttf", 30),
-            "mira": pygame.transform.scale(pygame.image.load("assets/img/mira2.png"), (27, 27)),
-            "bala": pygame.transform.scale(pygame.image.load("assets/img/bala.png"), (20, 20)),
-            "tiro": pygame.transform.scale(self.sprites["personagem_atirando"],(self.sprites["personagem_atirando"].get_width()*5,self.sprites["personagem_atirando"].get_height()*5)),
-            "parado": pygame.transform.scale(self.sprites["personagem_parado"], (self.sprites["personagem_parado"].get_width()*5, self.sprites["personagem_parado"].get_height()*5)),
-            "walk_inverted": pygame.transform.scale(self.sprites["personagem_andar_para_tras"], (self.sprites["personagem_andar_para_tras"].get_width()*5, self.sprites["personagem_andar_para_tras"].get_height()*5)),
-            "walk": pygame.transform.scale(self.sprites["personagem_andar"], (self.sprites["personagem_andar"].get_width() * 5, self.sprites["personagem_andar"].get_height() * 5)),
-            "zumbi_morto": pygame.transform.scale(self.sprites["zumbi_morto"], (self.sprites["zumbi_morto"].get_width()*5, self.sprites["zumbi_morto"].get_height()*5)),
-            "zumbi_ferido": pygame.transform.scale(self.sprites["zumbi_ferido"], (self.sprites["zumbi_ferido"].get_width()*5, self.sprites["zumbi_ferido"].get_height()*5)),
-            "zombie_walk": pygame.transform.scale(self.sprites["zumbi_andar"], (self.sprites["zumbi_andar"].get_width()*5, self.sprites["zumbi_andar"].get_height()*5)),
-            "zombie_attack": pygame.transform.scale(self.sprites["zumbi_ataque"],(self.sprites["zumbi_ataque"].get_width()*5,self.sprites["zumbi_ataque"].get_height()*5)),
-            "personagem_dead": pygame.transform.scale(self.sprites["personagem_morre"],(self.sprites["personagem_morre"].get_width()*5,self.sprites["personagem_morre"].get_height()*5)),
-            "pesonagem_recarregar": pygame.transform.scale(self.sprites["personagem_recarregar"],(self.sprites["personagem_recarregar"].get_width()*5,self.sprites["personagem_recarregar"].get_height()*5)),
+            "placa": pygame.transform.scale(pygame.image.load("assets/img/placa.png"), (self.escala.escalar(150), self.escala.escalar(150))),
+            "fonte": pygame.font.Font("assets/font/PressStart2P.ttf", self.escala.escalar(24)),
+            "mira": pygame.transform.scale(pygame.image.load("assets/img/mira2.png"), (self.escala.escalar(27), self.escala.escalar(27))),
+            "bala": pygame.transform.scale(pygame.image.load("assets/img/bala.png"), (self.escala.escalar(20), self.escala.escalar(20))),
+            "tiro": pygame.transform.scale(self.sprites["personagem_atirando"],(tamanho_sprite_w(self.sprites["personagem_atirando"]), tamanho_sprite_h(self.sprites["personagem_atirando"]))),
+            "parado": pygame.transform.scale(self.sprites["personagem_parado"], (tamanho_sprite_w(self.sprites["personagem_parado"]), tamanho_sprite_h(self.sprites["personagem_parado"]))),
+            "walk_inverted": pygame.transform.scale(self.sprites["personagem_andar_para_tras"], (tamanho_sprite_w(self.sprites["personagem_andar_para_tras"]), tamanho_sprite_h(self.sprites["personagem_andar_para_tras"]))),
+            "walk": pygame.transform.scale(self.sprites["personagem_andar"], (tamanho_sprite_w(self.sprites["personagem_andar"]), tamanho_sprite_h(self.sprites["personagem_andar"]))),
+            "zumbi_morto": pygame.transform.scale(self.sprites["zumbi_morto"], (tamanho_sprite_w(self.sprites["zumbi_morto"]), tamanho_sprite_h(self.sprites["zumbi_morto"]))),
+            "zumbi_ferido": pygame.transform.scale(self.sprites["zumbi_ferido"], (tamanho_sprite_w(self.sprites["zumbi_ferido"]), tamanho_sprite_h(self.sprites["zumbi_ferido"]))),
+            "zombie_walk": pygame.transform.scale(self.sprites["zumbi_andar"], (tamanho_sprite_w(self.sprites["zumbi_andar"]), tamanho_sprite_h(self.sprites["zumbi_andar"]))),
+            "zombie_attack": pygame.transform.scale(self.sprites["zumbi_ataque"],(tamanho_sprite_w(self.sprites["zumbi_ataque"]), tamanho_sprite_h(self.sprites["zumbi_ataque"]))),
+            "personagem_dead": pygame.transform.scale(self.sprites["personagem_morre"],(tamanho_sprite_w(self.sprites["personagem_morre"]), tamanho_sprite_h(self.sprites["personagem_morre"]))),
+            "pesonagem_recarregar": pygame.transform.scale(self.sprites["personagem_recarregar"],(tamanho_sprite_w(self.sprites["personagem_recarregar"]), tamanho_sprite_h(self.sprites["personagem_recarregar"]))),
             "explosao_aerea": pygame.image.load("assets/img/explodindo.png"),
-            "bomba_aerea": pygame.transform.scale(pygame.image.load("assets/img/boma_aerea.png").convert_alpha(), (80, 75)),
-            "zombie_walk_corredor": pygame.transform.scale(self.sprites["zumbi_andar_corredor"], (self.sprites["zumbi_andar_corredor"].get_width()*5, self.sprites["zumbi_andar_corredor"].get_height()*5)),
-            "zumbi_morte_corredor": pygame.transform.scale(self.sprites["zumbi_morte_corredor"], (self.sprites["zumbi_morte_corredor"].get_width()*5, self.sprites["zumbi_morte_corredor"].get_height()*5)),
-            "corredor_ferido": pygame.transform.scale(self.sprites["corredor_ferido"], (self.sprites["corredor_ferido"].get_width()*5, self.sprites["corredor_ferido"].get_height()*5)),
-            "municoes": pygame.transform.scale(self.sprites["municoes"], (70, 70)),
-            "vida": pygame.transform.scale(self.sprites["vida"], (50, 50)),
+            "bomba_aerea": pygame.transform.scale(pygame.image.load("assets/img/boma_aerea.png").convert_alpha(), (self.escala.escalar(80), self.escala.escalar(75))),
+            "zombie_walk_corredor": pygame.transform.scale(self.sprites["zumbi_andar_corredor"], (tamanho_sprite_w(self.sprites["zumbi_andar_corredor"]), tamanho_sprite_h(self.sprites["zumbi_andar_corredor"]))),
+            "zumbi_morte_corredor": pygame.transform.scale(self.sprites["zumbi_morte_corredor"], (tamanho_sprite_w(self.sprites["zumbi_morte_corredor"]), tamanho_sprite_h(self.sprites["zumbi_morte_corredor"]))),
+            "corredor_ferido": pygame.transform.scale(self.sprites["corredor_ferido"], (tamanho_sprite_w(self.sprites["corredor_ferido"]), tamanho_sprite_h(self.sprites["corredor_ferido"]))),
+            "municoes": pygame.transform.scale(self.sprites["municoes"], (self.escala.escalar(50), self.escala.escalar(50))),
+            "vida": pygame.transform.scale(self.sprites["vida"], (self.escala.escalar(40), self.escala.escalar(40))),
         }
-        self.personagem = Personagens(self.assets['parado'], 7,self.tela)
+        self.personagem = Personagens(self.assets['parado'], 7, self.tela, self.escala)
         self.grupo_pesonagem = pygame.sprite.GroupSingle(self.personagem)
         self.moving_left = False
         self.moving_right = False
@@ -89,10 +95,11 @@ class TelaJogo(Tela):
         self.fps_monitor = FPS()
         self.cooldown = 250
         self.ultimo_update = pygame.time.get_ticks()
-        self.personagem_vida = 100
-        self.x = 0
         pygame.mouse.set_visible(False)
-        self.mira = pygame.transform.scale(self.assets["mira"], (27, 27))
+        # Cooldown para ataque de zumbi (evita dano múltiplo)
+        self.ultimo_dano_zumbi = pygame.time.get_ticks()
+        self.cooldown_dano_zumbi = 1000  # 1 segundo entre ataques
+        self.mira = self.assets["mira"]
 
         self.animacao_tiro = False
         self.animacao_repetir = False
@@ -110,6 +117,7 @@ class TelaJogo(Tela):
         self.personagem_recarregando = False
         self.zumbies_atingidos = 0
         self.estado_geral = "normal"
+        self.acionamento = None  # Inicializa variável para invasão
 
         self.usuario = {
             "vida": self.personagem.vidas,
@@ -131,19 +139,17 @@ class TelaJogo(Tela):
             return
         for evento in eventos:
             if evento.type == pygame.MOUSEBUTTONDOWN and evento.button == 1:
+                destino_x, destino_y = pygame.mouse.get_pos()
                 if self.personagem.municoes > 0:
-                    destino_x, destino_y = pygame.mouse.get_pos()
-                    if (destino_x > self.personagem.rect.centerx) and destino_y >= 400:
+                    if (destino_x > self.personagem.rect.centerx) and destino_y >= self.escala.escalar(400):
                         if agora - self.ultimo_update > self.cooldown:
-                            # if not self.animacao_tiro:
                             self.personagem.trocar_animacao(self.assets['tiro'], 4)
                             self.animacao_tiro = True
 
                             x = self.personagem.rect.centerx
                             y = self.personagem.rect.centery
 
-                            destino_x, destino_y = pygame.mouse.get_pos()
-                            novo_tiro = Tiro(x +50 , y - 40 , destino_x, destino_y, self.assets['bala'])
+                            novo_tiro = Tiro(x + self.escala.escalar(50), y - self.escala.escalar(40), destino_x, destino_y, self.assets['bala'], self.escala)
                             self.tiros.add(novo_tiro)
 
                             self.animacao_repetir = False
@@ -151,27 +157,25 @@ class TelaJogo(Tela):
                             self.tiro_sound.play()
                             self.personagem.municoes -= 1
                         else:
-                            # if self.personagem.municoes <= 0:
-                            #     self.arma_vazia.play()
                             self.personagem.trocar_animacao(self.assets["parado"], 7)
+                else:
+                    # Feedback visual quando sem munições (pode adicionar som depois)
+                    pass
             if evento.type == pygame.KEYDOWN:
                 if evento.key == pygame.K_r:
-                    if self.personagem.municoes <= 0 and self.personagem.municoes_totais >= 30:
-                        self.personagem.municoes = 30
-                        self.personagem.municoes_totais -= 30
-                        self.personagem.trocar_animacao(self.assets["pesonagem_recarregar"], 13)
-                        self.recarregar_sound.play()
-                        self.personagem_recarregando = True
-                    if 0 < self.personagem.municoes < 30:
+                    # Corrigido: usar elif para evitar múltiplas execuções
+                    if self.personagem.municoes_totais <= 0:
+                        # Sem munições para recarregar
+                        pass
+                    elif self.personagem.municoes < 30:
+                        # Recarrega até 30 ou até acabar as munições totais
                         diferenca = 30 - self.personagem.municoes
-                        self.personagem.municoes = 30
-                        self.personagem.municoes_totais -= diferenca
-                        self.personagem.trocar_animacao(self.assets["pesonagem_recarregar"], 13)
-                        self.recarregar_sound.play()
-                        self.personagem_recarregando = True
-                    if self.personagem.municoes_totais < 30:
-                        self.personagem.municoes = self.personagem.municoes_totais
-                        self.personagem.municoes_totais = 0
+                        if self.personagem.municoes_totais >= diferenca:
+                            self.personagem.municoes = 30
+                            self.personagem.municoes_totais -= diferenca
+                        else:
+                            self.personagem.municoes += self.personagem.municoes_totais
+                            self.personagem.municoes_totais = 0
                         self.personagem.trocar_animacao(self.assets["pesonagem_recarregar"], 13)
                         self.recarregar_sound.play()
                         self.personagem_recarregando = True
@@ -225,11 +229,11 @@ class TelaJogo(Tela):
         agora = pygame.time.get_ticks()
         if agora - self.ultima_geracao > self.intervalo_geracao:
             self.ultima_geracao = agora
-            novo_zumbi = Zumbies(self.assets["zombie_walk"], 10, self.tela)
+            novo_zumbi = Zumbies(self.assets["zombie_walk"], 10, self.tela, self.escala)
             self.zumbies.add(novo_zumbi)
         if agora - self.ultima_geracao_corredores > self.intervalo_geracao:
             self.ultima_geracao_corredores = agora
-            corredor = Zumbies_Corredores(self.assets["zombie_walk_corredor"], 8, self.tela)
+            corredor = Zumbies_Corredores(self.assets["zombie_walk_corredor"], 8, self.tela, self.escala)
             self.corredores.add(corredor)
         
 
@@ -239,41 +243,51 @@ class TelaJogo(Tela):
             self.ultimo_spawn_ameaca = agora
             self.intervalo_ameaca = random.randint(1000, 1600)
 
-            nova_ameaca = AmeacaAerea(self.assets["bomba_aerea"], self.tela["largura"])
+            nova_ameaca = AmeacaAerea(self.assets["bomba_aerea"], self.tela["largura"], self.escala)
             self.ameacas.add(nova_ameaca)
 
 
+        # Colisão zumbi-personagem usando rect.colliderect para melhor precisão
+        agora = pygame.time.get_ticks()
         colisao_zumbi_personagem = pygame.sprite.groupcollide(self.grupo_pesonagem, self.zumbies, False, False)
         for personagem, zumbie in colisao_zumbi_personagem.items():
             for zumbi in zumbie:
-                if zumbi.estado == 'andando':  # só inicia ataque se ainda estiver andando
-                    dx = self.personagem.rect.centerx - zumbi.rect.centerx
-                    dy = self.personagem.rect.centery - zumbi.rect.centery
-                    distancia = math.hypot(dx, dy)
-                    if distancia < 70:  # Ajuste esse valor para calibrar proximidade ideal
+                # Verifica colisão real usando rect
+                if self.personagem.rect.colliderect(zumbi.rect):
+                    if zumbi.estado == 'andando':  # só inicia ataque se ainda estiver andando
+                        # Verifica proximidade para iniciar ataque
+                        dx = self.personagem.rect.centerx - zumbi.rect.centerx
+                        dy = self.personagem.rect.centery - zumbi.rect.centery
+                        distancia = math.hypot(dx, dy)
+                        if distancia < self.escala.escalar(70):
                             zumbi.trocar_animacao(self.assets["zombie_attack"], 5, novo_estado='Ataque')
-                            self.personagem.vidas -= 10
-                            self.zumbi_grunindo.play()
-                            if self.personagem.vidas <= 0 and self.estado != "morto":
-                                self.personagem.vidas = 0
-                                morte = Impacto(self.personagem.image_rect.center, self.assets["personagem_dead"], 4, "Personagem")
-                                self.impactos.add(morte)
-                                self.grupo_pesonagem.remove(self.personagem)
-                                self.estado = "morto"
-                                self.tempo_morte = pygame.time.get_ticks()
+                            # Cooldown para evitar dano múltiplo
+                            if agora - self.ultimo_dano_zumbi >= self.cooldown_dano_zumbi:
+                                self.personagem.vidas -= 10
+                                self.ultimo_dano_zumbi = agora
+                                self.zumbi_grunindo.play()
+                                if self.personagem.vidas <= 0 and self.estado != "morto":
+                                    self.personagem.vidas = 0
+                                    morte = Impacto(self.personagem.image_rect.center, self.assets["personagem_dead"], 4, "Personagem")
+                                    self.impactos.add(morte)
+                                    self.grupo_pesonagem.remove(self.personagem)
+                                    self.estado = "morto"
+                                    self.tempo_morte = pygame.time.get_ticks()
 
+        # Colisão bomba-personagem melhorada
         colisoes_ameaca = pygame.sprite.spritecollide(self.personagem, self.ameacas, False)
         for ameaca in colisoes_ameaca:
-            if ameaca.rect.bottom <= self.personagem.rect.centery:
+            # Verifica se a bomba realmente colidiu com o personagem (não apenas se está acima)
+            if self.personagem.rect.colliderect(ameaca.rect):
                 if self.estado != "morto":
                     self.personagem.vidas -= 15
                     self.explosao.play()
 
                     offset_x = 0
-                    offset_y = 37 
+                    offset_y = self.escala.escalar(37) 
                     explosao_pos = (ameaca.rect.centerx + offset_x, ameaca.rect.centery + offset_y)
 
-                    explosao = ExplosaoAerea(explosao_pos, self.assets["explosao_aerea"], colunas=5, linhas=1, tamanho=(80, 80))
+                    explosao = ExplosaoAerea(explosao_pos, self.assets["explosao_aerea"], colunas=5, linhas=1, tamanho=(self.escala.escalar(80), self.escala.escalar(80)), escala=self.escala)
                     self.impactos.add(explosao)
 
                     ameaca.kill()
@@ -292,6 +306,7 @@ class TelaJogo(Tela):
                 from telas import TelaGameOver
                 self.jogo.trocar_tela(TelaGameOver(self.jogo, self.tela))
  
+        # Colisão tiro-zumbi (o tiro é removido automaticamente pelo groupcollide)
         colisao_tiro_zumbi = pygame.sprite.groupcollide(self.tiros, self.zumbies, True, False)
         for tiro, zumbis_atingidos in colisao_tiro_zumbi.items():
             for zumbi in zumbis_atingidos:
@@ -301,14 +316,14 @@ class TelaJogo(Tela):
                 if zumbi.vidas <= 0:
                     impacto = Impacto(zumbi.image_rect.center, self.assets["zumbi_morto"], 5, "zumbi")
                     self.impactos.add(impacto)
-                    self.zumbies.remove(zumbi)
-                    self.tiros.remove(tiro)
+                    zumbi.kill()  # Usa kill() em vez de remove() para melhor gerenciamento
                     self.personagem.zumbies_mortos += 1
                 else:
                     if zumbi.estado != 'dano':
                         zumbi.trocar_animacao(self.assets["zumbi_ferido"], 4, dano=True, novo_estado='dano')
 
 
+        # Colisão tiro-corredor (o tiro é removido automaticamente pelo groupcollide)
         colisao_tiro_corredor = pygame.sprite.groupcollide(self.tiros, self.corredores, True, False)
         for tiro, corredores_atingidos in colisao_tiro_corredor.items():    
             for corredor in corredores_atingidos:
@@ -316,10 +331,9 @@ class TelaJogo(Tela):
                 self.zumbies_atingidos += 1
                 self.zumbi_grunindo.play()
                 if corredor.vidas <= 0:
-                    impacto = Impacto(corredor.image_rect.center,self.assets["zumbi_morte_corredor"],5,"zumbi")
+                    impacto = Impacto(corredor.image_rect.center, self.assets["zumbi_morte_corredor"], 5, "zumbi")
                     self.impactos.add(impacto) 
-                    self.corredores.remove(corredor)
-                    self.tiros.remove(tiro)
+                    corredor.kill()  # Usa kill() em vez de remove() para melhor gerenciamento
                     self.personagem.zumbies_mortos += 1
                 else:
                     if corredor.estado != 'dano':
@@ -332,7 +346,7 @@ class TelaJogo(Tela):
                         x = self.personagem.rect.x
                         y = self.personagem.rect.y
                         destino_x, destino_y = pygame.mouse.get_pos()
-                        novo_tiro = Tiro(x +50 , y - 40 , destino_x, destino_y, self.assets['bala'])
+                        novo_tiro = Tiro(x + self.escala.escalar(50), y - self.escala.escalar(40), destino_x, destino_y, self.assets['bala'], self.escala)
                         self.tiros.add(novo_tiro)
                     else:
                         self.animacao_tiro = False  # Conclui a animação de tiro
@@ -345,20 +359,24 @@ class TelaJogo(Tela):
                 self.personagem.trocar_animacao(self.assets["parado"], 7)
         self.zumbies.update()
         for zumbie in self.zumbies:
-            if zumbie.rect.x < -150:
-                if self.estado_geral == "normal"and self.estado == "vivo":
-                    self.sirene.play()
-                    self.sirene.set_volume(0.5)
-                    self.acionamento = pygame.time.get_ticks()
-                    self.estado_geral = "invasao"
+            if zumbie.rect.x < -self.escala.escalar(150):
+                if self.estado_geral == "normal" and self.estado == "vivo":
+                    if not pygame.mixer.get_busy() or not self.sirene.get_num_channels():
+                        self.sirene.play()
+                        self.sirene.set_volume(0.5)
+                        self.acionamento = pygame.time.get_ticks()
+                        self.estado_geral = "invasao"
+                    break  # Evita múltiplas execuções
         self.corredores.update()
         for corredores in self.corredores:
-            if corredores.rect.x < -150:
+            if corredores.rect.x < -self.escala.escalar(150):
                 if self.estado_geral == "normal" and self.estado == "vivo":
-                    self.sirene.play()
-                    self.sirene.set_volume(0.5)
-                    self.acionamento = pygame.time.get_ticks()
-                    self.estado_geral = "invasao"
+                    if not pygame.mixer.get_busy() or not self.sirene.get_num_channels():
+                        self.sirene.play()
+                        self.sirene.set_volume(0.5)
+                        self.acionamento = pygame.time.get_ticks()
+                        self.estado_geral = "invasao"
+                    break  # Evita múltiplas execuções
         if self.estado_geral == "invasao" and self.acionamento is not None:
             agora = pygame.time.get_ticks()
             if agora - self.acionamento >= self.duracao*1000:
@@ -369,46 +387,103 @@ class TelaJogo(Tela):
         self.ameacas.update()
         
 
-        # Verificar movimento horizontal
+        # Verificar movimento horizontal - velocidade reduzida
+        velocidade_movimento = self.escala.escalar(2)  # Velocidade reduzida
         if self.moving_left or self.moving_right:
-            if self.moving_left and self.personagem.rect.x - self.personagem.rect.width >= 0:
-                self.personagem.mover(40, 0)
-            if self.moving_right and self.personagem.rect.x + self.personagem.rect.width < self.tela["largura"]:
-                self.personagem.mover(-40, 0)
+            if self.moving_left and self.personagem.rect.left > 0:
+                self.personagem.mover(velocidade_movimento, 0)
+            if self.moving_right and self.personagem.rect.right < self.tela["largura"]:
+                self.personagem.mover(-velocidade_movimento, 0)
 
-        # Verificar movimento vertical
+        # Verificar movimento vertical - limitado à calçada (aproximadamente 80% da altura da tela)
+        # O personagem não pode subir além da calçada, mas pode se mover verticalmente até lá
+        limite_calcada = int(self.tela["altura"] * 0.80)  # Calçada está a 80% da altura
         if self.moving_up or self.moving_down:
-            if self.moving_up and  self.personagem.rect.y - self.personagem.rect.height >= 0:
-                self.personagem.mover(0, -40)
-            if self.moving_down and  self.personagem.rect.y + self.personagem.rect.height < self.tela["altura"]:
-                self.personagem.mover(0, 40)
+            # W - mover para cima: pode mover até o limite da calçada
+            # Verifica se após mover, o bottom do personagem ainda estará na ou acima da calçada
+            if self.moving_up:
+                novo_bottom = self.personagem.rect.bottom - velocidade_movimento
+                if novo_bottom >= limite_calcada:
+                    self.personagem.mover(0, -velocidade_movimento)
+            # S - mover para baixo: pode mover até o fundo da tela
+            if self.moving_down and self.personagem.rect.bottom < self.tela["altura"]:
+                self.personagem.mover(0, velocidade_movimento)
         if self.personagem.vidas < 0:
             self.personagem.vidas = 0
     def desenha(self, janela):
         janela.fill((0, 0, 0))
         janela.blit(self.assets["img_fundo"], (0, 0))
         self.fps_monitor.calcula_fps()
+        
+        # FPS - canto inferior direito
         texto_fps = self.assets["fonte"].render(f'FPS: {self.fps_monitor.fps:.2f}', True, (255, 255, 255))
-        texto_fps = pygame.transform.scale(texto_fps, (150, 30))
-        janela.blit(texto_fps, ((self.tela["largura"]- 150), (self.tela["altura"] - 30)))
-        janela.blit(self.assets["placa"], (self.tela["largura"] - 1600, 400))
+        fps_x = self.tela["largura"] - texto_fps.get_width() - self.escala.escalar(10)
+        fps_y = self.tela["altura"] - texto_fps.get_height() - self.escala.escalar(10)
+        janela.blit(texto_fps, (fps_x, fps_y))
         
-
-
+        # Placa decorativa
+        janela.blit(self.assets["placa"], (self.tela["largura"] - self.escala.escalar(1600), self.escala.escalar(400)))
         
-        vida = self.assets["fonte"].render(f'   {self.personagem.vidas}', True, (255, 0,0))
-        vida = pygame.transform.scale(vida, (150, 30))
-        janela.blit(self.assets["vida"], (self.tela["largura"] - 120, 17))
-        janela.blit(vida, ((self.tela["largura"]- 150), 30))
-
-
-
-        self.cronometro.desenha(janela, (self.tela["largura"] // 2) - 50, 10)  # Desenha o cronômetro no canto superior esquerdo
+        # Vida - canto superior direito
+        vida_icono = self.assets["vida"]
+        vida_texto = self.assets["fonte"].render(f'{self.personagem.vidas}', True, (255, 0, 0))
         
-        municao = self.assets["fonte"].render(f'  {self.personagem.municoes}/{self.personagem.municoes_totais}', True, (255,255,255))
-        municao = pygame.transform.scale(municao, (150, 30))
-        janela.blit(municao, ((self.tela["largura"]- 150), 80))
-        janela.blit(self.assets["municoes"], (self.tela["largura"] - 190, 55))
+        # Calcular posição total (ícone + espaço + texto)
+        vida_largura_total = vida_icono.get_width() + self.escala.escalar(5) + vida_texto.get_width()
+        vida_x_inicio = self.tela["largura"] - vida_largura_total - self.escala.escalar(10)
+        vida_y = self.escala.escalar(10)
+        
+        # Alinhar verticalmente: centro do ícone com centro do texto
+        vida_icono_y = vida_y
+        vida_texto_y = vida_y + (vida_icono.get_height() - vida_texto.get_height()) // 2
+        
+        janela.blit(vida_icono, (vida_x_inicio, vida_icono_y))
+        janela.blit(vida_texto, (vida_x_inicio + vida_icono.get_width() + self.escala.escalar(5), vida_texto_y))
+
+        # Cronômetro - centro superior
+        self.cronometro.desenha(janela, (self.tela["largura"] // 2) - self.escala.escalar(50), self.escala.escalar(10))
+        
+        # Mensagem de munições vazias no topo da tela
+        if self.personagem.municoes == 0 and self.personagem.municoes_totais == 0:
+            mensagem_sem_municao = self.assets["fonte"].render("SEM MUNICOES!", True, (255, 0, 0))
+            mensagem_x = (self.tela["largura"] - mensagem_sem_municao.get_width()) // 2
+            mensagem_y = self.escala.escalar(50)
+            # Fundo semi-transparente para melhor visibilidade
+            fundo_mensagem = pygame.Surface((mensagem_sem_municao.get_width() + self.escala.escalar(20), 
+                                            mensagem_sem_municao.get_height() + self.escala.escalar(10)))
+            fundo_mensagem.set_alpha(200)
+            fundo_mensagem.fill((0, 0, 0))
+            janela.blit(fundo_mensagem, (mensagem_x - self.escala.escalar(10), mensagem_y - self.escala.escalar(5)))
+            janela.blit(mensagem_sem_municao, (mensagem_x, mensagem_y))
+        elif self.personagem.municoes == 0 and self.personagem.municoes_totais > 0:
+            mensagem_recarregar = self.assets["fonte"].render("PRESSIONE 'R' PARA RECARREGAR", True, (255, 200, 0))
+            mensagem_x = (self.tela["largura"] - mensagem_recarregar.get_width()) // 2
+            mensagem_y = self.escala.escalar(50)
+            # Fundo semi-transparente para melhor visibilidade
+            fundo_mensagem = pygame.Surface((mensagem_recarregar.get_width() + self.escala.escalar(20), 
+                                            mensagem_recarregar.get_height() + self.escala.escalar(10)))
+            fundo_mensagem.set_alpha(200)
+            fundo_mensagem.fill((0, 0, 0))
+            janela.blit(fundo_mensagem, (mensagem_x - self.escala.escalar(10), mensagem_y - self.escala.escalar(5)))
+            janela.blit(mensagem_recarregar, (mensagem_x, mensagem_y))
+        
+        # Munições - abaixo da vida
+        municao_icono = self.assets["municoes"]
+        # Muda cor do texto se estiver sem munições
+        cor_municao = (255, 0, 0) if self.personagem.municoes == 0 else (255, 255, 255)
+        municao_texto = self.assets["fonte"].render(f'{self.personagem.municoes}/{self.personagem.municoes_totais}', True, cor_municao)
+        
+        # Calcular posição total (ícone + espaço + texto)
+        municao_largura_total = municao_icono.get_width() + self.escala.escalar(5) + municao_texto.get_width()
+        municao_x_inicio = self.tela["largura"] - municao_largura_total - self.escala.escalar(10)
+        municao_y = vida_y + max(vida_icono.get_height(), vida_texto.get_height()) + self.escala.escalar(10)
+        
+        # Alinhar verticalmente: centro do ícone com centro do texto
+        municao_icono_y = municao_y
+        municao_texto_y = municao_y + (municao_icono.get_height() - municao_texto.get_height()) // 2
+        
+        janela.blit(municao_icono, (municao_x_inicio, municao_icono_y))
+        janela.blit(municao_texto, (municao_x_inicio + municao_icono.get_width() + self.escala.escalar(5), municao_texto_y))
 
         mouse_x, mouse_y = pygame.mouse.get_pos()
         mira_rect = self.mira.get_rect(center=(mouse_x, mouse_y))

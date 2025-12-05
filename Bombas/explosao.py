@@ -1,8 +1,11 @@
 import pygame
 
 class ExplosaoAerea(pygame.sprite.Sprite):
-    def __init__(self, center, spritesheet, colunas, linhas, tamanho=(80, 120)):
+    def __init__(self, center, spritesheet, colunas, linhas, tamanho=(80, 120), escala=None):
         super().__init__()
+        self.escala = escala
+        if escala:
+            tamanho = (escala.escalar(tamanho[0]), escala.escalar(tamanho[1]))
         self.frames = self.carregar_frames(spritesheet, colunas, linhas, tamanho)
         self.frame_atual = 0
         self.image = self.frames[self.frame_atual]

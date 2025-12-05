@@ -7,14 +7,15 @@ class TelaNome(Tela):
     def __init__(self, jogo, tela):
         self.jogo = jogo
         self.tela = tela
-        self.font = pygame.font.Font("assets/font/PressStart2P.ttf", 32)
+        self.escala = jogo.escalonamento
+        self.font = pygame.font.Font("assets/font/PressStart2P.ttf", self.escala.escalar(32))
         self.prompt_surf = self.font.render("Digite seu nome:", True, (222,177,61))
         self.input_text = ""
         self.error_message = ""
         self.color_inactive = pygame.Color('lightskyblue3')
         self.color_active   = pygame.Color('dodgerblue2')
         self.color = self.color_inactive
-        w, h = tela["largura"] // 2, 50
+        w, h = tela["largura"] // 2, self.escala.escalar(50)
         x = (tela["largura"] - w) // 2
         y = (tela["altura"]  - h) // 2
         self.input_rect = pygame.Rect(x, y, w, h)
@@ -48,18 +49,18 @@ class TelaNome(Tela):
     def desenha(self, janela):
         janela.fill((0, 0, 0))
         prompt_x = (self.tela["largura"] - self.prompt_surf.get_width()) // 2
-        janela.blit(self.prompt_surf, (prompt_x, self.input_rect.y - 60))
+        janela.blit(self.prompt_surf, (prompt_x, self.input_rect.y - self.escala.escalar(60)))
 
         txt_surf = self.font.render(self.input_text, True, (255,255,255))
-        width = max(self.input_rect.w, txt_surf.get_width()+10)
+        width = max(self.input_rect.w, txt_surf.get_width()+self.escala.escalar(10))
         self.input_rect.w = width
-        pygame.draw.rect(janela, self.color, self.input_rect, 2, border_radius=5)
-        janela.blit(txt_surf, (self.input_rect.x+5, self.input_rect.y+8))
+        pygame.draw.rect(janela, self.color, self.input_rect, 2, border_radius=self.escala.escalar(5))
+        janela.blit(txt_surf, (self.input_rect.x+self.escala.escalar(5), self.input_rect.y+self.escala.escalar(8)))
 
         if self.error_message:
-            erro_font = pygame.font.Font("assets/font/PressStart2P.ttf", 20)
+            erro_font = pygame.font.Font("assets/font/PressStart2P.ttf", self.escala.escalar(20))
             erro_surf = erro_font.render(self.error_message, True, (255, 0, 0))
             erro_x = (self.tela["largura"] - erro_surf.get_width()) // 2
-            janela.blit(erro_surf, (erro_x, self.input_rect.y + 70))
+            janela.blit(erro_surf, (erro_x, self.input_rect.y + self.escala.escalar(70)))
 
         pygame.display.flip()

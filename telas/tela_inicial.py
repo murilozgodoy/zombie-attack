@@ -9,7 +9,8 @@ class TelaInicial(Tela):
         pygame.mouse.set_visible(True)
         self.jogo = jogo
         self.tela = tela
-        self.fonte = pygame.font.Font("assets/font/PressStart2P.ttf", 30)
+        self.escala = jogo.escalonamento
+        self.fonte = pygame.font.Font("assets/font/PressStart2P.ttf", self.escala.escalar(30))
         if not pygame.mixer.get_busy():
             self.som_ambiente = pygame.mixer.Sound("assets/snd/som_ambiente.wav")
             self.som_ambiente.set_volume(0.1)
@@ -19,14 +20,14 @@ class TelaInicial(Tela):
             (tela["largura"], tela["altura"])            
         )
         self.botao_jogar_rect = pygame.Rect(
-            (tela["largura"] - 643) // 2,
-            (tela["altura"] - 184) // 2,
-            575, 170
+            (tela["largura"] - self.escala.escalar(643)) // 2,
+            (tela["altura"] - self.escala.escalar(184)) // 2,
+            self.escala.escalar(575), self.escala.escalar(170)
         )
         self.botao_instrucoes_rect = pygame.Rect(
-            (tela["largura"] - 643) // 2,
-            (tela["altura"] + 229) // 2,
-            575, 170
+            (tela["largura"] - self.escala.escalar(643)) // 2,
+            (tela["altura"] + self.escala.escalar(229)) // 2,
+            self.escala.escalar(575), self.escala.escalar(170)
         )
 
     def trata_eventos(self, eventos):
